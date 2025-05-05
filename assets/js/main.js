@@ -14,7 +14,7 @@ class MainScene extends Phaser.Scene {
     // === FONDO PARALLAX ===
     this.bg = this.add.tileSprite(0, 0, this.scale.width, this.scale.height * 2, 'sky')
       .setOrigin(0, 1)
-      .setScrollFactor(0); // Parallax manual
+      .setScrollFactor(0);
 
     // === TEXTO DE INICIO ===
     this.startText = this.add.text(this.scale.width / 2, this.scale.height / 2, 'Presiona espacio o toca para comenzar', {
@@ -26,26 +26,19 @@ class MainScene extends Phaser.Scene {
 
     // === PLATAFORMAS ===
     this.platforms = this.physics.add.staticGroup();
+    this.platformSpacing = 100;
 
+    // Generar plataformas iniciales
     for (let i = 0; i < 10; i++) {
-      const y = 600 - i * 100;
-      const x = Phaser.Math.Between(60, 100);
-
-      const gfx = this.add.rectangle(x, y, 70, 20, 0x00aa00);
-      const platform = this.platforms.create(x, y, null)
-        .setOrigin(0.5)
-        .setDisplaySize(60, 20)
-        .refreshBody();
-
-      platform.gfx = gfx;
-      platform.isOneWay = true;
+      const y = 600 - i * this.platformSpacing;
+      const x = Phaser.Math.Between(30, this.scale.width - 30);
+      this.createPlatform(x, y);
     }
 
     // === JUGADOR ===
     const bottomPlatform = this.platforms.getChildren()[0];
     const px = bottomPlatform.x;
     const py = bottomPlatform.y - 40;
-
     const playerRect = this.add.rectangle(px, py, 30, 30, 0x0000aa);
     this.player = this.physics.add.existing(playerRect);
     this.player.body.setCollideWorldBounds(false);
@@ -59,20 +52,17 @@ class MainScene extends Phaser.Scene {
     this.cameras.main.setDeadzone(100, 200);
     this.cameras.main.setBounds(0, -Infinity, this.scale.width, Infinity);
 
-    // === TRACKING ALTURA ===
+    // === TRACKING ===
     this.maxPlayerY = this.player.y;
     this.lastGeneratedPlatformY = this.getHighestPlatformY();
-    this.platformSpacing = 100;
 
     // === CONTROLES ===
     this.cursors = this.input.keyboard.createCursorKeys();
     this.input.keyboard.on('keydown-SPACE', () => this.startGame());
     this.input.on('pointerdown', () => this.startGame());
 
-    // === CONTROLES TÁCTILES ===
     const leftBtn = document.getElementById('left-btn');
     const rightBtn = document.getElementById('right-btn');
-
     if (leftBtn && rightBtn) {
       leftBtn.addEventListener('pointerdown', () => this.leftPressed = true);
       leftBtn.addEventListener('pointerup', () => this.leftPressed = false);
@@ -88,23 +78,27 @@ class MainScene extends Phaser.Scene {
 
   startGame() {
     if (this.gameStarted) return;
-
     this.gameStarted = true;
     this.startText.destroy();
     this.player.body.allowGravity = true;
     this.player.body.setVelocityY(-550);
   }
 
-  spawnPlatform(y) {
-    const x = Phaser.Math.Between(60, 300);
+  createPlatform(x, y) {
     const gfx = this.add.rectangle(x, y, 60, 20, 0x00aa00);
     const platform = this.platforms.create(x, y, null)
       .setOrigin(0.5)
-      .setDisplaySize(100, 20)
+      .setDisplaySize(60, 20)
       .refreshBody();
 
     platform.gfx = gfx;
     platform.isOneWay = true;
+  }
+
+  spawnPlatform(y) {
+    const padding = 30;
+    const x = Phaser.Math.Between(padding, this.scale.width - padding);
+    this.createPlatform(x, y);
   }
 
   getHighestPlatformY() {
@@ -130,7 +124,7 @@ class MainScene extends Phaser.Scene {
       this.player.body.setVelocityX(0);
     }
 
-    // === ENVOLVIMIENTO HORIZONTAL ===
+    // === ENVOLVIMIENTO ===
     const halfWidth = this.player.width / 2;
     if (this.player.x < -halfWidth) {
       this.player.x = screenWidth + halfWidth;
@@ -141,41 +135,30 @@ class MainScene extends Phaser.Scene {
     // === COLISIONES UNIDIRECCIONALES ===
     this.physics.overlap(this.player, this.platforms, (player, platform) => {
       const isFalling = player.body.velocity.y > 0;
-      const playerBottom = player.body.bottom;
-      const platformTop = platform.body.top;
-      const verticalOverlap = Math.abs(playerBottom - platformTop) < 10;
-
+      const verticalOverlap = Math.abs(player.body.bottom - platform.body.top) < 10;
       if (platform.isOneWay && isFalling && verticalOverlap) {
         player.body.setVelocityY(-550);
       }
     });
 
-    // === GENERACIÓN SEGURA DE PLATAFORMAS ===
+    // === TRACK ALTURA MÁXIMA ===
     if (this.player.y < this.maxPlayerY) {
       this.maxPlayerY = this.player.y;
-
-      const newPlatformY = this.lastGeneratedPlatformY - this.platformSpacing;
-
-      if (this.maxPlayerY < newPlatformY) {
-        this.spawnPlatform(newPlatformY);
-        this.lastGeneratedPlatformY = newPlatformY;
-      }
     }
 
-    // === GENERACIÓN ANTICIPADA DE PLATAFORMAS (BUFFER DE 5) ===
-    const bufferPlatforms = 3;
+    // === GENERACIÓN CON BUFFER DE 6 PLATAFORMAS ===
+    const bufferPlatforms = 6;
     const bufferHeight = bufferPlatforms * this.platformSpacing;
-    const platformGenerationThreshold = this.player.y - bufferHeight;
+    const platformThreshold = this.player.y - bufferHeight;
 
-    while (this.lastGeneratedPlatformY > platformGenerationThreshold) {
-      const newPlatformY = this.lastGeneratedPlatformY - this.platformSpacing;
-      this.spawnPlatform(newPlatformY);
-      this.lastGeneratedPlatformY = newPlatformY;
+    while (this.lastGeneratedPlatformY > platformThreshold) {
+      const newY = this.lastGeneratedPlatformY - this.platformSpacing;
+      this.spawnPlatform(newY);
+      this.lastGeneratedPlatformY = newY;
     }
 
-    // === LIMPIEZA DE PLATAFORMAS FUERA DE PANTALLA ===
+    // === LIMPIEZA ===
     const cameraBottom = this.cameras.main.scrollY + this.scale.height;
-
     this.platforms.getChildren().forEach(platform => {
       if (platform.y > cameraBottom + 200) {
         platform.gfx?.destroy();
@@ -183,12 +166,12 @@ class MainScene extends Phaser.Scene {
       }
     });
 
-    // === PARALLAX FONDO ===
+    // === PARALLAX ===
     this.bg.tilePositionY = this.cameras.main.scrollY;
   }
 }
 
-// === CONFIGURACIÓN DEL JUEGO ===
+// === CONFIGURACIÓN ===
 const config = {
   type: Phaser.AUTO,
   width: 360,
@@ -198,7 +181,7 @@ const config = {
     default: 'arcade',
     arcade: {
       gravity: { y: 1000 },
-      debug: false // Puedes cambiarlo a true para testeo
+      debug: false
     }
   },
   scene: [MainScene],
