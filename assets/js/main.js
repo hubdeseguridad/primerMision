@@ -5,38 +5,36 @@ class MainScene extends Phaser.Scene {
     this.rightPressed = false;
   }
 
-  preload() {
-    // Nada que cargar aún
-  }
+  preload() { }
 
   create() {
     // === JUGADOR ===
-    this.player = this.physics.add.sprite(180, 500, null) // posición inicial
+    this.player = this.physics.add.sprite(180, 500, null)
       .setOrigin(0.5)
-      .setDisplaySize(40, 40) // tamaño visible
-      .setBounce(0)           // sin rebote automático
-      .setCollideWorldBounds(true); // no salirse por arriba/abajo
+      .setDisplaySize(40, 40)
+      .setBounce(0);
 
-    // Colorear placeholder como cuadrado azul oscuro
     this.player.setTint(0x0000aa);
 
-    // === PLATAFORMA ===
-    this.platforms = this.physics.add.staticGroup(); // no se mueven
-    const ground = this.platforms.create(180, 600, null)
-      .setOrigin(0.5)
-      .setDisplaySize(100, 20) // tamaño visible
-      .refreshBody();
+    // === PLATAFORMAS ===
+    this.platforms = this.physics.add.staticGroup();
 
-    ground.setTint(0x00aa00); // verde
+    // Generamos varias plataformas unidireccionales en posiciones aleatorias
+    for (let i = 0; i < 10; i++) {
+      const y = 600 - i * 100;
+      const platform = this.platforms.create(Phaser.Math.Between(60, 300), y, null)
+        .setOrigin(0.5)
+        .setDisplaySize(100, 20)
+        .refreshBody();
 
-    // === COLISIONES ===
-    this.physics.add.collider(this.player, this.platforms, this.handlePlatformLanding, null, this);
+      platform.setTint(0x00aa00);
+      platform.isOneWay = true;
+    }
 
-    // === CONTROLES ===
+    // === CONTROLES TECLADO ===
     this.cursors = this.input.keyboard.createCursorKeys();
 
-
-    // Botones móviles
+    // === BOTONES TÁCTILES ===
     const leftBtn = document.getElementById('left-btn');
     const rightBtn = document.getElementById('right-btn');
 
@@ -49,47 +47,40 @@ class MainScene extends Phaser.Scene {
     rightBtn.addEventListener('pointerup', () => this.rightPressed = false);
     rightBtn.addEventListener('pointerout', () => this.rightPressed = false);
     rightBtn.addEventListener('pointercancel', () => this.rightPressed = false);
-
   }
 
   update() {
-    // === Movimiento lateral ===
-    const speed = 200;
-
-    if (this.cursors.left.isDown) {
-      this.player.setVelocityX(-speed);
-    } else if (this.cursors.right.isDown) {
-      this.player.setVelocityX(speed);
-    } else {
-      this.player.setVelocityX(0);
-    }
-
-    // === Combinar teclado y botones ===
-    const cursors = this.input.keyboard.createCursorKeys();
-
     const moveSpeed = 200;
-    if (cursors.left.isDown || this.leftPressed) {
+    const screenWidth = this.scale.width;
+
+    // === Movimiento lateral ===
+    if (this.cursors.left.isDown || this.leftPressed) {
       this.player.setVelocityX(-moveSpeed);
-    } else if (cursors.right.isDown || this.rightPressed) {
+    } else if (this.cursors.right.isDown || this.rightPressed) {
       this.player.setVelocityX(moveSpeed);
     } else {
       this.player.setVelocityX(0);
     }
 
-  }
-
-  handlePlatformLanding(player, platform) {
-    const isFalling = player.body.velocity.y > 0;
-
-    // Calculamos si el jugador realmente cae sobre la plataforma
-    const playerBottom = player.body.bottom;
-    const platformTop = platform.body.top;
-
-    const overlapThreshold = 5;
-
-    if (player.body.touching.down && platform.body.touching.up) {
-      player.setVelocityY(-550);
+    // === Envolvimiento horizontal ===
+    const halfWidth = this.player.displayWidth / 2;
+    if (this.player.x < -halfWidth) {
+      this.player.x = screenWidth + halfWidth;
+    } else if (this.player.x > screenWidth + halfWidth) {
+      this.player.x = -halfWidth;
     }
+
+    // === Colisión condicional con plataformas unidireccionales ===
+    this.physics.overlap(this.player, this.platforms, (player, platform) => {
+      const isFalling = player.body.velocity.y > 0;
+      const playerBottom = player.body.bottom;
+      const platformTop = platform.body.top;
+      const verticalOverlap = Math.abs(playerBottom - platformTop) < 10;
+
+      if (platform.isOneWay && isFalling && verticalOverlap) {
+        player.setVelocityY(-550); // rebote solo si cae desde arriba
+      }
+    }, null, this);
   }
 }
 
