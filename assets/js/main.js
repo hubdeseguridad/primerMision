@@ -4,6 +4,10 @@ class MainScene extends Phaser.Scene {
     this.leftPressed = false;
     this.rightPressed = false;
     this.gameStarted = false;
+
+    this.score = 0;
+    this.scoreText = null;
+    this.lastTouchedPlatformY = Infinity; // Track de la última plataforma tocada
   }
 
   preload() {
@@ -23,6 +27,13 @@ class MainScene extends Phaser.Scene {
       padding: { x: 10, y: 6 },
       align: 'center'
     }).setOrigin(0.5);
+
+    // === SISTEMA DE PUNTOS ===
+    this.scoreText = this.add.text(10, 10, 'Puntos: 0', {
+      fontSize: '18px',
+      fill: '#000',
+      padding: { x: 10, y: 5 }
+    }).setScrollFactor(0).setDepth(10); // Fijo en pantalla y sobre todo
 
     // === PLATAFORMAS ===
     this.platforms = this.physics.add.staticGroup();
@@ -96,9 +107,16 @@ class MainScene extends Phaser.Scene {
   }
 
   spawnPlatform(y) {
-    const padding = 30;
-    const x = Phaser.Math.Between(padding, this.scale.width - padding);
-    this.createPlatform(x, y);
+    const x = Phaser.Math.Between(30, this.scale.width - 30); 
+    const gfx = this.add.rectangle(x, y, 60, 20, 0x00aa00);
+
+    const platform = this.platforms.create(x, y, null)
+      .setOrigin(0.5)
+      .setDisplaySize(60, 20)
+      .refreshBody();
+
+    platform.gfx = gfx;
+    platform.isOneWay = true;
   }
 
   getHighestPlatformY() {
@@ -132,12 +150,19 @@ class MainScene extends Phaser.Scene {
       this.player.x = -halfWidth;
     }
 
-    // === COLISIONES UNIDIRECCIONALES ===
+    // === COLISIONES UNIDIRECCIONALES + SCORE ===
     this.physics.overlap(this.player, this.platforms, (player, platform) => {
       const isFalling = player.body.velocity.y > 0;
       const verticalOverlap = Math.abs(player.body.bottom - platform.body.top) < 10;
       if (platform.isOneWay && isFalling && verticalOverlap) {
         player.body.setVelocityY(-550);
+
+        // SCORE: Si esta plataforma está más arriba que la última tocada
+        if (platform.y < this.lastTouchedPlatformY) {
+          this.lastTouchedPlatformY = platform.y;
+          this.score++;
+          this.scoreText.setText('Puntos: ' + this.score);
+        }
       }
     });
 
