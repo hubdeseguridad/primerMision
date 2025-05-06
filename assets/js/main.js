@@ -1,3 +1,4 @@
+// === ESCENA PRINCIPAL OPTIMIZADA ===
 class MainScene extends Phaser.Scene {
   constructor() {
     super('MainScene');
@@ -7,7 +8,8 @@ class MainScene extends Phaser.Scene {
 
     this.score = 0;
     this.scoreText = null;
-    this.lastTouchedPlatformY = Infinity; // Track de la última plataforma tocada
+    this.lastTouchedPlatformY = Infinity;
+    this.platformPool = []; // Pool de plataformas reutilizables
   }
 
   preload() {
@@ -22,24 +24,18 @@ class MainScene extends Phaser.Scene {
 
     // === TEXTO DE INICIO ===
     this.startText = this.add.text(this.scale.width / 2, this.scale.height / 2, 'Presiona espacio o toca para comenzar', {
-      fontSize: '15px',
-      fill: '#000',
-      padding: { x: 10, y: 6 },
-      align: 'center'
+      fontSize: '15px', fill: '#000', padding: { x: 10, y: 6 }, align: 'center'
     }).setOrigin(0.5);
 
     // === SISTEMA DE PUNTOS ===
     this.scoreText = this.add.text(10, 10, 'Puntos: 0', {
-      fontSize: '18px',
-      fill: '#000',
-      padding: { x: 10, y: 5 }
-    }).setScrollFactor(0).setDepth(10); // Fijo en pantalla y sobre todo
+      fontSize: '18px', fill: '#000', padding: { x: 10, y: 5 }
+    }).setScrollFactor(0).setDepth(10);
 
-    // === PLATAFORMAS ===
-    this.platforms = this.physics.add.staticGroup();
+    // === GRUPO DE PLATAFORMAS ===
+    this.platforms = this.add.group();
     this.platformSpacing = 100;
 
-    // Generar plataformas iniciales
     for (let i = 0; i < 10; i++) {
       const y = 600 - i * this.platformSpacing;
       const x = Phaser.Math.Between(30, this.scale.width - 30);
@@ -47,21 +43,18 @@ class MainScene extends Phaser.Scene {
     }
 
     // === JUGADOR ===
-    const bottomPlatform = this.platforms.getChildren()[0];
-    const px = bottomPlatform.x;
-    const py = bottomPlatform.y - 40;
-    const playerRect = this.add.rectangle(px, py, 30, 30, 0x0000aa);
-    this.player = this.physics.add.existing(playerRect);
-    this.player.body.setCollideWorldBounds(false);
-    this.player.body.setBounce(0);
+    const base = this.platforms.getChildren()[0];
+    const px = base.x;
+    const py = base.y - 40;
+    this.player = this.add.rectangle(px, py, 30, 30, 0x0000aa);
+    this.physics.add.existing(this.player);
+    this.player.body.setBounce(0).setCollideWorldBounds(false);
     this.player.body.allowGravity = false;
-    this.player.body.setVelocity(0, 0);
-    this.player.setOrigin(0.5);
 
     // === CÁMARA ===
     this.cameras.main.startFollow(this.player, true, 0.05, 0.05);
     this.cameras.main.setDeadzone(100, 200);
-    this.cameras.main.setBounds(0, -Infinity, this.scale.width, Infinity);
+    this.cameras.main.setBounds(0, -2000, this.scale.width, 5000);
 
     // === TRACKING ===
     this.maxPlayerY = this.player.y;
@@ -69,8 +62,8 @@ class MainScene extends Phaser.Scene {
 
     // === CONTROLES ===
     this.cursors = this.input.keyboard.createCursorKeys();
-    this.input.keyboard.on('keydown-SPACE', () => this.startGame());
-    this.input.on('pointerdown', () => this.startGame());
+    this.input.keyboard.once('keydown-SPACE', () => this.startGame());
+    this.input.once('pointerdown', () => this.startGame());
 
     const leftBtn = document.getElementById('left-btn');
     const rightBtn = document.getElementById('right-btn');
@@ -96,34 +89,34 @@ class MainScene extends Phaser.Scene {
   }
 
   createPlatform(x, y) {
-    const gfx = this.add.rectangle(x, y, 60, 20, 0x00aa00);
-    const platform = this.platforms.create(x, y, null)
-      .setOrigin(0.5)
-      .setDisplaySize(60, 20)
-      .refreshBody();
-
-    platform.gfx = gfx;
-    platform.isOneWay = true;
+    const platform = this.add.rectangle(x, y, 60, 20, 0x00aa00);
+    this.physics.add.existing(platform, true);
+    platform.body.checkCollision.down = false;
+    platform.setData('isOneWay', true);
+    this.platforms.add(platform);
   }
 
-  spawnPlatform(y) {
-    const x = Phaser.Math.Between(30, this.scale.width - 30); 
-    const gfx = this.add.rectangle(x, y, 60, 20, 0x00aa00);
-
-    const platform = this.platforms.create(x, y, null)
-      .setOrigin(0.5)
-      .setDisplaySize(60, 20)
-      .refreshBody();
-
-    platform.gfx = gfx;
-    platform.isOneWay = true;
+  getPlatformFromPool(x, y) {
+    const platform = this.platformPool.find(p => !p.active);
+    if (platform) {
+      platform.setPosition(x, y);
+      platform.setActive(true).setVisible(true);
+      platform.body.enable = true;
+    } else {
+      const newPlat = this.add.rectangle(x, y, 60, 20, 0x00aa00);
+      this.physics.add.existing(newPlat, true);
+      newPlat.body.checkCollision.down = false;
+      newPlat.setData('isOneWay', true);
+      this.platforms.add(newPlat);
+      this.platformPool.push(newPlat);
+      return newPlat;
+    }
+    return platform;
   }
 
   getHighestPlatformY() {
     let minY = Infinity;
-    this.platforms.getChildren().forEach(platform => {
-      if (platform.y < minY) minY = platform.y;
-    });
+    this.platforms.getChildren().forEach(p => { if (p.y < minY) minY = p.y; });
     return minY;
   }
 
@@ -131,9 +124,10 @@ class MainScene extends Phaser.Scene {
     if (!this.gameStarted) return;
 
     const moveSpeed = 200;
+    const halfW = this.player.width / 2;
     const screenWidth = this.scale.width;
 
-    // === MOVIMIENTO HORIZONTAL ===
+    // === MOVIMIENTO ===
     if (this.cursors.left.isDown || this.leftPressed) {
       this.player.body.setVelocityX(-moveSpeed);
     } else if (this.cursors.right.isDown || this.rightPressed) {
@@ -142,22 +136,16 @@ class MainScene extends Phaser.Scene {
       this.player.body.setVelocityX(0);
     }
 
-    // === ENVOLVIMIENTO ===
-    const halfWidth = this.player.width / 2;
-    if (this.player.x < -halfWidth) {
-      this.player.x = screenWidth + halfWidth;
-    } else if (this.player.x > screenWidth + halfWidth) {
-      this.player.x = -halfWidth;
-    }
+    // === ENVOLVIMIENTO HORIZONTAL ===
+    if (this.player.x < -halfW) this.player.x = screenWidth + halfW;
+    if (this.player.x > screenWidth + halfW) this.player.x = -halfW;
 
-    // === COLISIONES UNIDIRECCIONALES + SCORE ===
+    // === COLISIONES ===
     this.physics.overlap(this.player, this.platforms, (player, platform) => {
       const isFalling = player.body.velocity.y > 0;
-      const verticalOverlap = Math.abs(player.body.bottom - platform.body.top) < 10;
-      if (platform.isOneWay && isFalling && verticalOverlap) {
+      const overlap = Math.abs(player.body.bottom - platform.body.top) < 10;
+      if (platform.getData('isOneWay') && isFalling && overlap) {
         player.body.setVelocityY(-550);
-
-        // SCORE: Si esta plataforma está más arriba que la última tocada
         if (platform.y < this.lastTouchedPlatformY) {
           this.lastTouchedPlatformY = platform.y;
           this.score++;
@@ -166,37 +154,40 @@ class MainScene extends Phaser.Scene {
       }
     });
 
-    // === TRACK ALTURA MÁXIMA ===
+    // === ALTURA MÁXIMA ===
     if (this.player.y < this.maxPlayerY) {
       this.maxPlayerY = this.player.y;
     }
 
-    // === GENERACIÓN CON BUFFER DE 6 PLATAFORMAS ===
-    const bufferPlatforms = 6;
-    const bufferHeight = bufferPlatforms * this.platformSpacing;
-    const platformThreshold = this.player.y - bufferHeight;
-
-    while (this.lastGeneratedPlatformY > platformThreshold) {
+    // === GENERACIÓN DE PLATAFORMAS ===
+    const threshold = this.player.y - (6 * this.platformSpacing);
+    while (this.lastGeneratedPlatformY > threshold) {
       const newY = this.lastGeneratedPlatformY - this.platformSpacing;
-      this.spawnPlatform(newY);
+      const newX = Phaser.Math.Between(30, this.scale.width - 30);
+      this.getPlatformFromPool(newX, newY);
       this.lastGeneratedPlatformY = newY;
     }
 
-    // === LIMPIEZA ===
+    // === LIMPIEZA DE PLATAFORMAS FUERA DE CÁMARA ===
     const cameraBottom = this.cameras.main.scrollY + this.scale.height;
     this.platforms.getChildren().forEach(platform => {
       if (platform.y > cameraBottom + 200) {
-        platform.gfx?.destroy();
-        platform.destroy();
+        platform.setActive(false).setVisible(false);
+        platform.body.enable = false;
       }
     });
 
     // === PARALLAX ===
     this.bg.tilePositionY = this.cameras.main.scrollY;
+
+    // === LIMITE DE CAÍDA ===
+    if (this.player.y > cameraBottom + 100) {
+      this.scene.restart();
+    }
   }
 }
 
-// === CONFIGURACIÓN ===
+// === CONFIGURACIÓN DEL JUEGO ===
 const config = {
   type: Phaser.AUTO,
   width: 360,
@@ -204,10 +195,7 @@ const config = {
   backgroundColor: '#87CEEB',
   physics: {
     default: 'arcade',
-    arcade: {
-      gravity: { y: 1000 },
-      debug: false
-    }
+    arcade: { gravity: { y: 1000 }, debug: false }
   },
   scene: [MainScene],
   scale: {
