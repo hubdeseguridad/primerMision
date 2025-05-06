@@ -4,9 +4,10 @@ class MainScene extends Phaser.Scene {
     this.leftPressed = false;
     this.rightPressed = false;
     this.gameStarted = false;
-
     this.score = 0;
     this.lastTouchedPlatformY = Infinity;
+    this.objectSpawnTimer = 0;
+    this.objectSpawnInterval = 2000;
   }
 
   preload() {
@@ -14,12 +15,23 @@ class MainScene extends Phaser.Scene {
   }
 
   create() {
-    // === FONDO PARALLAX ===
+    this.setupBackground();
+    this.setupText();
+    this.setupPlatforms();
+    this.setupPlayer();
+    this.setupFallingObjects();
+    this.setupCamera();
+    this.setupControls();
+    this.setupCollisions();
+  }
+
+  setupBackground() {
     this.bg = this.add.tileSprite(0, 0, this.scale.width, this.scale.height * 2, 'sky')
       .setOrigin(0, 1)
       .setScrollFactor(0);
+  }
 
-    // === TEXTO DE INICIO ===
+  setupText() {
     this.startText = this.add.text(this.scale.width / 2, this.scale.height / 2, 'Presiona espacio o toca para comenzar', {
       fontSize: '15px',
       fill: '#000',
@@ -27,14 +39,14 @@ class MainScene extends Phaser.Scene {
       align: 'center'
     }).setOrigin(0.5);
 
-    // === SISTEMA DE PUNTOS ===
     this.scoreText = this.add.text(10, 10, 'Puntos: 0', {
       fontSize: '18px',
       fill: '#000',
       padding: { x: 10, y: 5 }
     }).setScrollFactor(0).setDepth(10);
+  }
 
-    // === PLATAFORMAS ===
+  setupPlatforms() {
     this.platforms = this.physics.add.staticGroup();
     this.platformSpacing = 100;
 
@@ -42,26 +54,32 @@ class MainScene extends Phaser.Scene {
       this.createPlatform(Phaser.Math.Between(30, this.scale.width - 30), 600 - i * this.platformSpacing);
     }
 
-    // === JUGADOR ===
+    this.lastGeneratedPlatformY = this.getHighestPlatformY();
+  }
+
+  setupPlayer() {
     const bottomPlatform = this.platforms.getChildren()[0];
     this.player = this.physics.add.existing(
       this.add.rectangle(bottomPlatform.x, bottomPlatform.y - 40, 30, 30, 0x0000aa)
     );
     this.player.body.setCollideWorldBounds(false).setBounce(0).allowGravity = false;
+    this.player.setData('isAlive', true);
+    this.maxPlayerY = this.player.y;
+  }
 
-    // === CÁMARA ===
+  setupFallingObjects() {
+    this.fallingObjects = this.physics.add.group();
+  }
+
+  setupCamera() {
     this.cameras.main.startFollow(this.player, true, 0.05, 0.05);
     this.cameras.main.setDeadzone(100, 200).setBounds(0, -Infinity, this.scale.width, Infinity);
+  }
 
-    // === TRACKING ===
-    this.maxPlayerY = this.player.y;
-    this.lastGeneratedPlatformY = this.getHighestPlatformY();
-
-    // === CONTROLES ===
+  setupControls() {
     this.cursors = this.input.keyboard.createCursorKeys();
     this.input.keyboard.on('keydown-SPACE', () => this.startGame());
     this.input.on('pointerdown', () => this.startGame());
-
     this.setupTouchControls();
   }
 
@@ -70,14 +88,17 @@ class MainScene extends Phaser.Scene {
     const rightBtn = document.getElementById('right-btn');
     if (leftBtn && rightBtn) {
       const setButtonState = (btn, state) => {
-        btn.addEventListener('pointerdown', () => this[state] = true);
-        btn.addEventListener('pointerup', () => this[state] = false);
-        btn.addEventListener('pointerout', () => this[state] = false);
-        btn.addEventListener('pointercancel', () => this[state] = false);
+        ['pointerdown', 'pointerup', 'pointerout', 'pointercancel'].forEach(event =>
+          btn.addEventListener(event, () => this[state] = event === 'pointerdown')
+        );
       };
       setButtonState(leftBtn, 'leftPressed');
       setButtonState(rightBtn, 'rightPressed');
     }
+  }
+
+  setupCollisions() {
+    this.physics.add.overlap(this.player, this.fallingObjects, this.handleFallingObjectCollision, null, this);
   }
 
   startGame() {
@@ -105,24 +126,57 @@ class MainScene extends Phaser.Scene {
     return Math.min(...this.platforms.getChildren().map(platform => platform.y));
   }
 
-  update() {
-    if (!this.gameStarted) return;
+  spawnFallingDamageObject() {
+    if (!this.gameStarted || !this.player.getData('isAlive')) return;
+    const x = Phaser.Math.Between(30, this.scale.width - 30);
+    const y = this.cameras.main.scrollY - 140;
+    const fallingObject = this.fallingObjects.create(x, y, null)
+      .setOrigin(0.5)
+      .setDisplaySize(20, 20)
+      .setVelocityY(Phaser.Math.Between(200, 400));
+    fallingObject.gfx = this.add.rectangle(x, y, 20, 20, 0xff0000);
+    fallingObject.body.setCircle(10);
+    this.objectSpawnInterval = Phaser.Math.Between(5000, 10000);
+  }
 
+  handleFallingObjectCollision(player, fallingObject) {
+    if (player.getData('isAlive')) {
+      console.log('¡El jugador ha sido golpeado!');
+      player.setData('isAlive', false);
+      player.body.setVelocityY(0);
+      player.body.allowGravity = false;
+      this.physics.pause();
+      this.add.text(this.scale.width / 2, this.scale.height / 2, '¡Game Over!', { fontSize: '32px', fill: '#fff' }).setOrigin(0.5);
+    }
+    fallingObject.gfx.destroy();
+    fallingObject.destroy();
+  }
+
+  update(time, delta) {
+    if (!this.gameStarted || !this.player.getData('isAlive')) return;
+
+    this.handlePlayerMovement();
+    this.handlePlatformCollisions();
+    this.handlePlatformGeneration();
+    this.handleFallingObjects(delta);
+    this.bg.tilePositionY = this.cameras.main.scrollY;
+  }
+
+  handlePlayerMovement() {
     const moveSpeed = 200;
     const screenWidth = this.scale.width;
 
-    // === MOVIMIENTO HORIZONTAL ===
     this.player.body.setVelocityX(
       (this.cursors.left.isDown || this.leftPressed) ? -moveSpeed :
       (this.cursors.right.isDown || this.rightPressed) ? moveSpeed : 0
     );
 
-    // === ENVOLVIMIENTO ===
     const halfWidth = this.player.width / 2;
     if (this.player.x < -halfWidth) this.player.x = screenWidth + halfWidth;
     else if (this.player.x > screenWidth + halfWidth) this.player.x = -halfWidth;
+  }
 
-    // === COLISIONES UNIDIRECCIONALES + SCORE ===
+  handlePlatformCollisions() {
     this.physics.overlap(this.player, this.platforms, (player, platform) => {
       if (platform.isOneWay && player.body.velocity.y > 0 && Math.abs(player.body.bottom - platform.body.top) < 10) {
         player.body.setVelocityY(-550);
@@ -132,17 +186,14 @@ class MainScene extends Phaser.Scene {
         }
       }
     });
+  }
 
-    // === TRACK ALTURA MÁXIMA ===
-    this.maxPlayerY = Math.min(this.maxPlayerY, this.player.y);
-
-    // === GENERACIÓN CON BUFFER DE 6 PLATAFORMAS ===
-    const bufferHeight = 6 * this.platformSpacing;
+  handlePlatformGeneration() {
+    const bufferHeight = 3 * this.platformSpacing;
     while (this.lastGeneratedPlatformY > this.player.y - bufferHeight) {
       this.spawnPlatform(this.lastGeneratedPlatformY -= this.platformSpacing);
     }
 
-    // === LIMPIEZA ===
     const cameraBottom = this.cameras.main.scrollY + this.scale.height;
     this.platforms.getChildren().forEach(platform => {
       if (platform.y > cameraBottom + 200) {
@@ -150,13 +201,25 @@ class MainScene extends Phaser.Scene {
         platform.destroy();
       }
     });
+  }
 
-    // === PARALLAX ===
-    this.bg.tilePositionY = this.cameras.main.scrollY;
+  handleFallingObjects(delta) {
+    this.objectSpawnTimer += delta;
+    if (this.objectSpawnTimer >= this.objectSpawnInterval) {
+      this.spawnFallingDamageObject();
+      this.objectSpawnTimer = 0;
+    }
+
+    const cameraBottom = this.cameras.main.scrollY + this.scale.height;
+    this.fallingObjects.getChildren().forEach(object => {
+      if (object.y > cameraBottom + 50) {
+        object.gfx?.destroy();
+        object.destroy();
+      }
+    });
   }
 }
 
-// === CONFIGURACIÓN ===
 const config = {
   type: Phaser.AUTO,
   width: 360,
