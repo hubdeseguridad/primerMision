@@ -21,13 +21,17 @@ class MainScene extends Phaser.Scene {
   }
 
   create() {
+    this.setupScene();
+    this.setupControls();
+  }
+
+  setupScene() {
     this.setupBackground();
     this.setupText();
     this.setupPlatforms();
     this.setupPlayer();
     this.setupFallingObjects();
     this.setupCamera();
-    this.setupControls();
     this.setupCollisions();
   }
 
@@ -137,13 +141,23 @@ class MainScene extends Phaser.Scene {
     if (!this.gameStarted || !this.player.getData('isAlive')) return;
     const x = Phaser.Math.Between(30, this.scale.width - 30);
     const y = this.cameras.main.scrollY - 140;
-    const object = this.fallingObjects.create(x, y, null)
-      .setOrigin(0.5)
-      .setDisplaySize(20, 20)
-      .setVelocityY(Phaser.Math.Between(...velocityRange));
-    object.gfx = this.add.rectangle(x, y, 20, 20, color);
+    const object = this.add.rectangle(x, y, 20, 20, color);
+    this.physics.add.existing(object);
     object.body.setCircle(10);
+    object.body.setVelocityY(Phaser.Math.Between(...velocityRange));
     object.setData('type', type);
+    this.fallingObjects.add(object);
+    return object;
+  }
+
+  spawnFallingDamageObject() {
+    const damage = this.spawnFallingObject('damage', 0xff0000, [200, 400]);
+    if (damage) damage.body.gravity.y = 300;
+  }
+
+  spawnScoreBonusObject() {
+    const score = this.spawnFallingObject('score', 0x0000ff, [150, 300]);
+    if (score) score.body.gravity.y = 100;
   }
 
   handleFallingObjectCollision(player, fallingObject) {
@@ -157,7 +171,6 @@ class MainScene extends Phaser.Scene {
       this.scoreText.setText('Puntos: ' + this.score);
     }
 
-    fallingObject.gfx.destroy();
     fallingObject.destroy();
   }
 
@@ -188,7 +201,7 @@ class MainScene extends Phaser.Scene {
 
     this.player.body.setVelocityX(
       (this.cursors.left.isDown || this.leftPressed) ? -moveSpeed :
-        (this.cursors.right.isDown || this.rightPressed) ? moveSpeed : 0
+      (this.cursors.right.isDown || this.rightPressed) ? moveSpeed : 0
     );
 
     const halfWidth = this.player.width / 2;
@@ -228,13 +241,13 @@ class MainScene extends Phaser.Scene {
     this.timers.scoreBonus.elapsed += delta;
 
     if (this.timers.damageObject.elapsed >= this.timers.damageObject.interval) {
-      this.spawnFallingObject('damage', 0xff0000, [200, 400]); // Rojo
+      this.spawnFallingDamageObject();
       this.timers.damageObject.elapsed = 0;
       this.timers.damageObject.interval = Phaser.Math.Between(5000, 10000);
     }
 
     if (this.timers.scoreBonus.elapsed >= this.timers.scoreBonus.interval) {
-      this.spawnFallingObject('score', 0x0000ff, [150, 300]); // Azul
+      this.spawnScoreBonusObject();
       this.timers.scoreBonus.elapsed = 0;
       this.timers.scoreBonus.interval = Phaser.Math.Between(10000, 15000);
     }
@@ -242,8 +255,7 @@ class MainScene extends Phaser.Scene {
     const cameraBottom = this.cameras.main.scrollY + this.scale.height;
     this.fallingObjects.getChildren().forEach(object => {
       if (object.y > cameraBottom + 50) {
-        object.gfx?.destroy();
-        object.destroy();
+        object.destroy(); // Destruye el objeto completo
       }
     });
   }
