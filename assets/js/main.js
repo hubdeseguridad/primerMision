@@ -162,52 +162,42 @@ class MainScene extends Phaser.Scene {
   spawnFallingObject(type, color, velocityRange) {
     if (!this.gameStarted || !this.player.getData('isAlive')) return;
     const x = Phaser.Math.Between(30, this.scale.width - 30);
-    // Cambiar la posición de spawn para que sea mucho más arriba
-    const y = this.cameras.main.scrollY - this.scale.height * 1.5; // 1.5 veces la altura de la pantalla
+    const y = this.cameras.main.scrollY - this.scale.height * 1.5;
     const object = this.add.rectangle(x, y, 20, 20, color);
     this.physics.add.existing(object);
     object.body.setCircle(10);
 
-    // Calcular la velocidad inicial para que tarde 4 segundos en caer
-    const fallTime = 8000; // 4 segundos en milisegundos
-    const distance = this.scale.height * 1.5; // Distancia que recorre el objeto (1.5 veces la altura de la pantalla)
+    const fallTime = 8000;
+    const distance = this.scale.height * 1.5;
     const gravity = 20;
-    const initialVelocity = (distance - 0.5 * gravity * (fallTime * fallTime) / 1000000) / (fallTime / 1000); 
-
-    // Ajustar la velocidad para que sea más lenta (cámara lenta)
-    const slowMotionFactor = 0.8; // ajustar este valor para controlar la velocidad de la cámara lenta
+    const initialVelocity = (distance - 0.5 * gravity * (fallTime * fallTime) / 1000000) / (fallTime / 1000);
+    const slowMotionFactor = 0.8;
     object.body.setVelocityY(initialVelocity * slowMotionFactor);
 
     object.setData('type', type);
     this.fallingObjects.add(object);
-    if (type === 'damage') {
-      object.alias = 'Ladrillo';
-    } else if (type === 'score') {
-      object.alias = 'DC3';
-    }
+    object.alias = type === 'damage' ? 'Ladrillo' : 'DC3';
     return object;
   }
 
   spawnFallingDamageObject() {
-    const damage = this.spawnFallingObject('damage', 0xff0000, [0, 0]); // Velocidad inicial calculada en spawnFallingObject
+    const damage = this.spawnFallingObject('damage', 0xff0000, [0, 0]);
     if (damage) damage.body.gravity.y = 20;
   }
 
   spawnScoreBonusObject() {
-    const score = this.spawnFallingObject('score', 0x0000ff, [0, 0]); // Velocidad inicial calculada en spawnFallingObject
+    const score = this.spawnFallingObject('score', 0x0000ff, [0, 0]);
     if (score) score.body.gravity.y = 20;
   }
 
   spawnShieldObject() {
     if (!this.gameStarted || !this.player.getData('isAlive') || this.hasShield) return;
-    const spawnY = this.cameras.main.scrollY - this.scale.height * 1.5;
     const x = Phaser.Math.Between(30, this.scale.width - 30);
-    const y = spawnY;
+    const y = this.cameras.main.scrollY - this.scale.height * 1.5;
     const shield = this.add.rectangle(x, y, 20, 20, 0xffff00);
     this.physics.add.existing(shield);
     shield.body.setImmovable(true);
     shield.body.gravity.y = 50;
-    console.log('Spawning shield at:', x, y, 'Gravity enabled:', shield.body.allowGravity);
     this.shieldObjects.add(shield);
     this.shieldObject = shield;
     shield.alias = 'Casco';
@@ -215,9 +205,8 @@ class MainScene extends Phaser.Scene {
 
   spawnBootsObject() {
     if (!this.gameStarted || !this.player.getData('isAlive') || this.hasBoots) return;
-    const spawnY = this.cameras.main.scrollY - this.scale.height * 1.5;
     const x = Phaser.Math.Between(30, this.scale.width - 30);
-    const y = spawnY;
+    const y = this.cameras.main.scrollY - this.scale.height * 1.5;
     const boots = this.add.rectangle(x, y, 20, 20, 0x00ff00);
     this.physics.add.existing(boots);
     boots.body.setImmovable(true);
@@ -235,10 +224,8 @@ class MainScene extends Phaser.Scene {
       if (this.hasShield) {
         this.hasShield = false;
         this.player.fillColor = this.playerColor;
-        if (this.shieldObject) {
-          this.shieldObject.destroy();
-          this.shieldObject = null;
-        }
+        this.shieldObject?.destroy();
+        this.shieldObject = null;
       } else {
         this.endGame();
       }
@@ -265,9 +252,11 @@ class MainScene extends Phaser.Scene {
       this.originalPlayerJumpSpeed = this.player.body.velocity.y;
       this.player.body.setVelocityY(-1000);
       this.timers.bootsEffect.elapsed = 0;
-      this.timers.bootsEffect.duration = 5000; // Duración de 5 segundos
+      this.timers.bootsEffect.duration = 5000;
       this.bootsObject.destroy();
       this.bootsObject = null;
+      this.score += 3;
+      this.scoreText.setText('Puntos: ' + this.score);
     }
   }
 
