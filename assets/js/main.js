@@ -22,6 +22,7 @@ class MainScene extends Phaser.Scene {
     };
     this.shieldObject = null;
     this.bootsObject = null;
+    this.isPaused = false;
   }
 
   preload() {
@@ -43,6 +44,7 @@ class MainScene extends Phaser.Scene {
     this.setupBootsObjects();
     this.setupCamera();
     this.setupCollisions();
+    this.setupPauseButton();
   }
 
   setupBackground() {
@@ -111,6 +113,7 @@ class MainScene extends Phaser.Scene {
     this.input.keyboard.on('keydown-SPACE', () => this.startGame());
     this.input.on('pointerdown', () => this.startGame());
     this.setupTouchControls();
+    this.input.keyboard.on('keydown-P', () => this.togglePause());
   }
 
   setupTouchControls() {
@@ -132,6 +135,24 @@ class MainScene extends Phaser.Scene {
     this.physics.add.overlap(this.player, this.fallingObjects, this.handleFallingObjectCollision, null, this);
     this.physics.add.overlap(this.player, this.shieldObjects, this.handleShieldCollision, null, this);
     this.physics.add.overlap(this.player, this.bootsObjects, this.handleBootsCollision, null, this);
+  }
+
+  setupPauseButton() {
+    this.pauseBtn = document.getElementById('pause-btn');
+    this.pauseBtn.addEventListener('click', () => this.togglePause());
+    this.pauseText = this.add.text(this.scale.width / 2, this.scale.height / 2 - 50, 'Pausado', {
+      fontSize: '32px',
+      fill: '#fff'
+    }).setOrigin(0.5).setDepth(100).setVisible(false);
+  }
+
+  togglePause() {
+    this.isPaused = !this.isPaused;
+    this.physics.pause();
+    this.pauseText.setVisible(this.isPaused);
+    if (!this.isPaused) {
+      this.physics.resume();
+    }
   }
 
   startGame() {
@@ -212,8 +233,8 @@ class MainScene extends Phaser.Scene {
     boots.body.setImmovable(true);
     boots.body.gravity.y = 50;
     this.bootsObjects.add(boots);
-    boots.alias = 'Botas';
     this.bootsObject = boots;
+    boots.alias = 'Botas';
   }
 
   handleFallingObjectCollision(player, fallingObject) {
@@ -272,7 +293,7 @@ class MainScene extends Phaser.Scene {
   }
 
   update(time, delta) {
-    if (!this.gameStarted || !this.player.getData('isAlive')) return;
+    if (!this.gameStarted || !this.player.getData('isAlive') || this.isPaused) return;
 
     this.handlePlayerMovement();
     this.handlePlatformCollisions();
@@ -290,7 +311,7 @@ class MainScene extends Phaser.Scene {
 
     this.player.body.setVelocityX(
       (this.cursors.left.isDown || this.leftPressed) ? -moveSpeed :
-        (this.cursors.right.isDown || this.rightPressed) ? moveSpeed : 0
+      (this.cursors.right.isDown || this.rightPressed) ? moveSpeed : 0
     );
 
     const halfWidth = this.player.width / 2;
