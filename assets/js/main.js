@@ -10,10 +10,13 @@ class MainScene extends Phaser.Scene {
     this.gameStarted = false;
     this.score = 0;
     this.lastTouchedPlatformY = Infinity;
+    this.hasShield = false;
     this.timers = {
       damageObject: { elapsed: 0, interval: Phaser.Math.Between(5000, 10000) },
-      scoreBonus: { elapsed: 0, interval: Phaser.Math.Between(10000, 15000) }
+      scoreBonus: { elapsed: 0, interval: Phaser.Math.Between(10000, 15000) },
+      shieldObject: { elapsed: 0, interval: 13000 }
     };
+    this.shieldObject = null;
   }
 
   preload() {
@@ -31,6 +34,7 @@ class MainScene extends Phaser.Scene {
     this.setupPlatforms();
     this.setupPlayer();
     this.setupFallingObjects();
+    this.setupShieldObjects();
     this.setupCamera();
     this.setupCollisions();
   }
@@ -75,10 +79,15 @@ class MainScene extends Phaser.Scene {
     this.player.body.setCollideWorldBounds(false).setBounce(0).allowGravity = false;
     this.player.setData('isAlive', true);
     this.maxPlayerY = this.player.y;
+    this.playerColor = 0x0000aa;
   }
 
   setupFallingObjects() {
     this.fallingObjects = this.physics.add.group();
+  }
+
+  setupShieldObjects() {
+    this.shieldObjects = this.physics.add.group();
   }
 
   setupCamera() {
@@ -110,6 +119,7 @@ class MainScene extends Phaser.Scene {
 
   setupCollisions() {
     this.physics.add.overlap(this.player, this.fallingObjects, this.handleFallingObjectCollision, null, this);
+    this.physics.add.overlap(this.player, this.shieldObjects, this.handleShieldCollision, null, this);
   }
 
   startGame() {
@@ -160,18 +170,52 @@ class MainScene extends Phaser.Scene {
     if (score) score.body.gravity.y = 100;
   }
 
+  spawnShieldObject() {
+    if (!this.gameStarted || !this.player.getData('isAlive') || this.hasShield) return;
+    const platform = Phaser.Utils.Array.GetRandom(this.platforms.getChildren());
+    if (platform) {
+      const x = platform.x;
+      const y = platform.y - 30;
+      const shield = this.add.rectangle(x, y, 20, 20, 0xffff00);
+      this.physics.add.existing(shield);
+      shield.body.setImmovable(true);
+      shield.body.allowGravity = false;
+      console.log('Spawning shield at:', x, y, 'Gravity enabled:', shield.body.allowGravity); // Verificación de gravedad
+      this.shieldObjects.add(shield);
+      this.shieldObject = shield;
+    }
+  }
+
   handleFallingObjectCollision(player, fallingObject) {
     if (!player.getData('isAlive')) return;
 
     const type = fallingObject.getData('type');
     if (type === 'damage') {
-      this.endGame();
+      if (this.hasShield) {
+        this.hasShield = false;
+        this.player.fillColor = this.playerColor;
+        if (this.shieldObject) {
+          this.shieldObject.destroy();
+          this.shieldObject = null;
+        }
+      } else {
+        this.endGame();
+      }
     } else if (type === 'score') {
       this.score += 10;
       this.scoreText.setText('Puntos: ' + this.score);
     }
 
     fallingObject.destroy();
+  }
+
+  handleShieldCollision(player, shield) {
+    if (!this.hasShield) {
+      this.hasShield = true;
+      this.player.fillColor = 0xffff00;
+      shield.destroy();
+      this.shieldObject = null;
+    }
   }
 
   endGame() {
@@ -192,6 +236,7 @@ class MainScene extends Phaser.Scene {
     this.handlePlatformCollisions();
     this.handlePlatformGeneration();
     this.handleFallingObjects(delta);
+    this.handleShieldSpawning(delta);
     this.bg.tilePositionY = this.cameras.main.scrollY;
   }
 
@@ -255,9 +300,17 @@ class MainScene extends Phaser.Scene {
     const cameraBottom = this.cameras.main.scrollY + this.scale.height;
     this.fallingObjects.getChildren().forEach(object => {
       if (object.y > cameraBottom + 50) {
-        object.destroy(); // Destruye el objeto completo
+        object.destroy();
       }
     });
+  }
+
+  handleShieldSpawning(delta) {
+    this.timers.shieldObject.elapsed += delta;
+    if (this.timers.shieldObject.elapsed >= this.timers.shieldObject.interval) {
+      this.spawnShieldObject();
+      this.timers.shieldObject.elapsed = 0;
+    }
   }
 }
 
