@@ -157,6 +157,14 @@ class MainScene extends Phaser.Scene {
     object.body.setVelocityY(Phaser.Math.Between(...velocityRange));
     object.setData('type', type);
     this.fallingObjects.add(object);
+
+    // Set Alias
+    if (type === 'damage') {
+      object.alias = 'Ladrillo';
+    } else if (type === 'score') {
+      object.alias = 'DC3';
+    }
+
     return object;
   }
 
@@ -183,6 +191,7 @@ class MainScene extends Phaser.Scene {
       console.log('Spawning shield at:', x, y, 'Gravity enabled:', shield.body.allowGravity); // Verificación de gravedad
       this.shieldObjects.add(shield);
       this.shieldObject = shield;
+      shield.alias = 'Casco'; // Set Alias
     }
   }
 
