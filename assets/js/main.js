@@ -11,12 +11,17 @@ class MainScene extends Phaser.Scene {
     this.score = 0;
     this.lastTouchedPlatformY = Infinity;
     this.hasShield = false;
+    this.hasBoots = false;
+    this.originalPlayerJumpSpeed = -550;
     this.timers = {
       damageObject: { elapsed: 0, interval: Phaser.Math.Between(5000, 10000) },
       scoreBonus: { elapsed: 0, interval: Phaser.Math.Between(10000, 15000) },
-      shieldObject: { elapsed: 0, interval: 13000 }
+      shieldObject: { elapsed: 0, interval: 13000 },
+      bootsObject: { elapsed: 0, interval: Phaser.Math.Between(8000, 12000) },
+      bootsEffect: { elapsed: 0, duration: 5000 }
     };
     this.shieldObject = null;
+    this.bootsObject = null;
   }
 
   preload() {
@@ -35,6 +40,7 @@ class MainScene extends Phaser.Scene {
     this.setupPlayer();
     this.setupFallingObjects();
     this.setupShieldObjects();
+    this.setupBootsObjects();
     this.setupCamera();
     this.setupCollisions();
   }
@@ -80,6 +86,7 @@ class MainScene extends Phaser.Scene {
     this.player.setData('isAlive', true);
     this.maxPlayerY = this.player.y;
     this.playerColor = 0x0000aa;
+    this.originalPlayerJumpSpeed = -550;
   }
 
   setupFallingObjects() {
@@ -88,6 +95,10 @@ class MainScene extends Phaser.Scene {
 
   setupShieldObjects() {
     this.shieldObjects = this.physics.add.group();
+  }
+
+  setupBootsObjects() {
+    this.bootsObjects = this.physics.add.group();
   }
 
   setupCamera() {
@@ -120,6 +131,7 @@ class MainScene extends Phaser.Scene {
   setupCollisions() {
     this.physics.add.overlap(this.player, this.fallingObjects, this.handleFallingObjectCollision, null, this);
     this.physics.add.overlap(this.player, this.shieldObjects, this.handleShieldCollision, null, this);
+    this.physics.add.overlap(this.player, this.bootsObjects, this.handleBootsCollision, null, this);
   }
 
   startGame() {
@@ -150,49 +162,69 @@ class MainScene extends Phaser.Scene {
   spawnFallingObject(type, color, velocityRange) {
     if (!this.gameStarted || !this.player.getData('isAlive')) return;
     const x = Phaser.Math.Between(30, this.scale.width - 30);
-    const y = this.cameras.main.scrollY - 140;
+    // Cambiar la posición de spawn para que sea mucho más arriba
+    const y = this.cameras.main.scrollY - this.scale.height * 1.5; // 1.5 veces la altura de la pantalla
     const object = this.add.rectangle(x, y, 20, 20, color);
     this.physics.add.existing(object);
     object.body.setCircle(10);
-    object.body.setVelocityY(Phaser.Math.Between(...velocityRange));
+
+    // Calcular la velocidad inicial para que tarde 4 segundos en caer
+    const fallTime = 8000; // 4 segundos en milisegundos
+    const distance = this.scale.height * 1.5; // Distancia que recorre el objeto (1.5 veces la altura de la pantalla)
+    const gravity = 20;
+    const initialVelocity = (distance - 0.5 * gravity * (fallTime * fallTime) / 1000000) / (fallTime / 1000); 
+
+    // Ajustar la velocidad para que sea más lenta (cámara lenta)
+    const slowMotionFactor = 0.8; // ajustar este valor para controlar la velocidad de la cámara lenta
+    object.body.setVelocityY(initialVelocity * slowMotionFactor);
+
     object.setData('type', type);
     this.fallingObjects.add(object);
-
-    // Set Alias
     if (type === 'damage') {
       object.alias = 'Ladrillo';
     } else if (type === 'score') {
       object.alias = 'DC3';
     }
-
     return object;
   }
 
   spawnFallingDamageObject() {
-    const damage = this.spawnFallingObject('damage', 0xff0000, [200, 400]);
-    if (damage) damage.body.gravity.y = 300;
+    const damage = this.spawnFallingObject('damage', 0xff0000, [0, 0]); // Velocidad inicial calculada en spawnFallingObject
+    if (damage) damage.body.gravity.y = 20;
   }
 
   spawnScoreBonusObject() {
-    const score = this.spawnFallingObject('score', 0x0000ff, [150, 300]);
-    if (score) score.body.gravity.y = 100;
+    const score = this.spawnFallingObject('score', 0x0000ff, [0, 0]); // Velocidad inicial calculada en spawnFallingObject
+    if (score) score.body.gravity.y = 20;
   }
 
   spawnShieldObject() {
     if (!this.gameStarted || !this.player.getData('isAlive') || this.hasShield) return;
-    const platform = Phaser.Utils.Array.GetRandom(this.platforms.getChildren());
-    if (platform) {
-      const x = platform.x;
-      const y = platform.y - 30;
-      const shield = this.add.rectangle(x, y, 20, 20, 0xffff00);
-      this.physics.add.existing(shield);
-      shield.body.setImmovable(true);
-      shield.body.allowGravity = false;
-      console.log('Spawning shield at:', x, y, 'Gravity enabled:', shield.body.allowGravity); // Verificación de gravedad
-      this.shieldObjects.add(shield);
-      this.shieldObject = shield;
-      shield.alias = 'Casco'; // Set Alias
-    }
+    const spawnY = this.cameras.main.scrollY - this.scale.height * 1.5;
+    const x = Phaser.Math.Between(30, this.scale.width - 30);
+    const y = spawnY;
+    const shield = this.add.rectangle(x, y, 20, 20, 0xffff00);
+    this.physics.add.existing(shield);
+    shield.body.setImmovable(true);
+    shield.body.gravity.y = 50;
+    console.log('Spawning shield at:', x, y, 'Gravity enabled:', shield.body.allowGravity);
+    this.shieldObjects.add(shield);
+    this.shieldObject = shield;
+    shield.alias = 'Casco';
+  }
+
+  spawnBootsObject() {
+    if (!this.gameStarted || !this.player.getData('isAlive') || this.hasBoots) return;
+    const spawnY = this.cameras.main.scrollY - this.scale.height * 1.5;
+    const x = Phaser.Math.Between(30, this.scale.width - 30);
+    const y = spawnY;
+    const boots = this.add.rectangle(x, y, 20, 20, 0x00ff00);
+    this.physics.add.existing(boots);
+    boots.body.setImmovable(true);
+    boots.body.gravity.y = 50;
+    this.bootsObjects.add(boots);
+    boots.alias = 'Botas';
+    this.bootsObject = boots;
   }
 
   handleFallingObjectCollision(player, fallingObject) {
@@ -227,6 +259,18 @@ class MainScene extends Phaser.Scene {
     }
   }
 
+  handleBootsCollision(player, boots) {
+    if (!this.hasBoots) {
+      this.hasBoots = true;
+      this.originalPlayerJumpSpeed = this.player.body.velocity.y;
+      this.player.body.setVelocityY(-1000);
+      this.timers.bootsEffect.elapsed = 0;
+      this.timers.bootsEffect.duration = 5000; // Duración de 5 segundos
+      this.bootsObject.destroy();
+      this.bootsObject = null;
+    }
+  }
+
   endGame() {
     this.player.setData('isAlive', false);
     this.player.body.setVelocityY(0);
@@ -246,6 +290,8 @@ class MainScene extends Phaser.Scene {
     this.handlePlatformGeneration();
     this.handleFallingObjects(delta);
     this.handleShieldSpawning(delta);
+    this.handleBootsSpawning(delta);
+    this.handleBootsEffect(delta);
     this.bg.tilePositionY = this.cameras.main.scrollY;
   }
 
@@ -255,7 +301,7 @@ class MainScene extends Phaser.Scene {
 
     this.player.body.setVelocityX(
       (this.cursors.left.isDown || this.leftPressed) ? -moveSpeed :
-      (this.cursors.right.isDown || this.rightPressed) ? moveSpeed : 0
+        (this.cursors.right.isDown || this.rightPressed) ? moveSpeed : 0
     );
 
     const halfWidth = this.player.width / 2;
@@ -319,6 +365,25 @@ class MainScene extends Phaser.Scene {
     if (this.timers.shieldObject.elapsed >= this.timers.shieldObject.interval) {
       this.spawnShieldObject();
       this.timers.shieldObject.elapsed = 0;
+    }
+  }
+
+  handleBootsSpawning(delta) {
+    this.timers.bootsObject.elapsed += delta;
+    if (this.timers.bootsObject.elapsed >= this.timers.bootsObject.interval) {
+      this.spawnBootsObject();
+      this.timers.bootsObject.elapsed = 0;
+    }
+  }
+
+  handleBootsEffect(delta) {
+    if (this.hasBoots) {
+      this.timers.bootsEffect.elapsed += delta;
+      if (this.timers.bootsEffect.elapsed >= this.timers.bootsEffect.duration) {
+        this.hasBoots = false;
+        this.player.fillColor = this.playerColor;
+        this.player.body.setVelocityY(this.originalPlayerJumpSpeed);
+      }
     }
   }
 }
