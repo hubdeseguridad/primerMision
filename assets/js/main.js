@@ -23,7 +23,9 @@ class MainScene extends Phaser.Scene {
     this.shieldObject = null;
     this.bootsObject = null;
     this.isPaused = false;
-    this.specialObjectsGravity = 10; // Gravedad para los objetos especiales (daño, bonus, escudo y botas)
+    this.specialObjectsGravity = 10;
+    this.platformTypes = ['static', 'bomb', 'movingY', 'movingX'];
+    this.platforms = null; // Inicializar en null para asegurarse de que se crea en create()
   }
 
   preload() {
@@ -38,7 +40,7 @@ class MainScene extends Phaser.Scene {
   setupScene() {
     this.setupBackground();
     this.setupText();
-    this.setupPlatforms();
+    this.setupPlatforms(); // Llamar a setupPlatforms aquí
     this.setupPlayer();
     this.setupFallingObjects();
     this.setupShieldObjects();
@@ -70,11 +72,12 @@ class MainScene extends Phaser.Scene {
   }
 
   setupPlatforms() {
-    this.platforms = this.physics.add.staticGroup();
+    this.platforms = this.physics.add.staticGroup(); // Crear el grupo aquí
     this.platformSpacing = 100;
+    this.maxPlatforms = 15;
 
     for (let i = 0; i < 10; i++) {
-      this.createPlatform(Phaser.Math.Between(30, this.scale.width - 30), 600 - i * this.platformSpacing);
+      this.createPlatform(Phaser.Math.Between(30, this.scale.width - 30), 600 - i * this.platformSpacing, 'static');
     }
 
     this.lastGeneratedPlatformY = this.getHighestPlatformY();
@@ -164,17 +167,32 @@ class MainScene extends Phaser.Scene {
     this.player.body.setVelocityY(-550);
   }
 
-  createPlatform(x, y) {
+  createPlatform(x, y, type = 'static') {
     const platform = this.platforms.create(x, y, null)
       .setOrigin(0.5)
       .setDisplaySize(60, 20)
       .refreshBody();
-    platform.gfx = this.add.rectangle(x, y, 60, 20, 0x00aa00);
+    platform.gfx = this.add.rectangle(x, y, 60, 20, this.getPlatformColor(type));
     platform.isOneWay = true;
+    platform.type = type;
+    if (type === 'bomb') {
+      platform.timer = null;
+    }
+  }
+
+  getPlatformColor(type) {
+    switch (type) {
+      case 'static': return 0x00aa00;
+      case 'bomb': return 0x8b0000;
+      case 'movingY': return 0x0000ff;
+      case 'movingX': return 0xffff00;
+      default: return 0x00aa00;
+    }
   }
 
   spawnPlatform(y) {
-    this.createPlatform(Phaser.Math.Between(30, this.scale.width - 30), y);
+    const platformType = this.platformTypes[Phaser.Math.Between(0, this.platformTypes.length - 1)];
+    this.createPlatform(Phaser.Math.Between(30, this.scale.width - 30), y, platformType);
   }
 
   getHighestPlatformY() {
@@ -221,7 +239,7 @@ class MainScene extends Phaser.Scene {
     const shield = this.add.rectangle(x, y, 20, 20, 0xffff00);
     this.physics.add.existing(shield);
     shield.body.setImmovable(true);
-    shield.body.gravity.y = this.specialObjectsGravity; 
+    shield.body.gravity.y = this.specialObjectsGravity;
     this.shieldObjects.add(shield);
     this.shieldObject = shield;
     shield.alias = 'Casco';
@@ -234,7 +252,7 @@ class MainScene extends Phaser.Scene {
     const boots = this.add.rectangle(x, y, 20, 20, 0x00ff00);
     this.physics.add.existing(boots);
     boots.body.setImmovable(true);
-    boots.body.gravity.y = this.specialObjectsGravity; 
+    boots.body.gravity.y = this.specialObjectsGravity;
     this.bootsObjects.add(boots);
     this.bootsObject = boots;
     boots.alias = 'Botas';
@@ -330,6 +348,16 @@ class MainScene extends Phaser.Scene {
           this.lastTouchedPlatformY = platform.y;
           this.scoreText.setText('Puntos: ' + (++this.score));
         }
+
+        if (platform.type === 'bomb') {
+          if (!platform.timer) {
+            platform.timer = this.time.delayedCall(2000, () => {
+              platform.gfx?.destroy();
+              platform.destroy();
+              platform.timer = null;
+            });
+          }
+        }
       }
     });
   }
@@ -409,7 +437,7 @@ const config = {
   physics: {
     default: 'arcade',
     arcade: {
-      gravity: { y: 1000 }, // Gravedad global del juego para el jugador y las plataformas
+      gravity: { y: 1000 },
       debug: false
     }
   },
