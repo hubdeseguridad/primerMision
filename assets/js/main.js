@@ -24,8 +24,9 @@ class MainScene extends Phaser.Scene {
     this.bootsObject = null;
     this.isPaused = false;
     this.specialObjectsGravity = 10;
-    this.platformTypes = ['static', 'bomb', 'movingY', 'movingX'];
-    this.platforms = null; // Inicializar en null para asegurarse de que se crea en create()
+    this.platformTypes = ['static', 'bomb'];
+    this.platforms = null; 
+    this.bombPlatformPercentage = 0.15;
   }
 
   preload() {
@@ -40,7 +41,7 @@ class MainScene extends Phaser.Scene {
   setupScene() {
     this.setupBackground();
     this.setupText();
-    this.setupPlatforms(); // Llamar a setupPlatforms aquí
+    this.setupPlatforms();
     this.setupPlayer();
     this.setupFallingObjects();
     this.setupShieldObjects();
@@ -72,11 +73,12 @@ class MainScene extends Phaser.Scene {
   }
 
   setupPlatforms() {
-    this.platforms = this.physics.add.staticGroup(); // Crear el grupo aquí
+    this.platforms = this.physics.add.staticGroup();
     this.platformSpacing = 100;
     this.maxPlatforms = 15;
 
     for (let i = 0; i < 10; i++) {
+      const type = Math.random() < this.bombPlatformPercentage ? 'bomb' : 'static';
       this.createPlatform(Phaser.Math.Between(30, this.scale.width - 30), 600 - i * this.platformSpacing, 'static');
     }
 
@@ -184,8 +186,6 @@ class MainScene extends Phaser.Scene {
     switch (type) {
       case 'static': return 0x00aa00;
       case 'bomb': return 0x8b0000;
-      case 'movingY': return 0x0000ff;
-      case 'movingX': return 0xffff00;
       default: return 0x00aa00;
     }
   }
@@ -351,7 +351,7 @@ class MainScene extends Phaser.Scene {
 
         if (platform.type === 'bomb') {
           if (!platform.timer) {
-            platform.timer = this.time.delayedCall(2000, () => {
+            platform.timer = this.time.delayedCall(1500, () => {
               platform.gfx?.destroy();
               platform.destroy();
               platform.timer = null;
