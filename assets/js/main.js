@@ -23,6 +23,7 @@ class MainScene extends Phaser.Scene {
     this.shieldObject = null;
     this.bootsObject = null;
     this.isPaused = false;
+    this.specialObjectsGravity = 10; // Gravedad para los objetos especiales (daño, bonus, escudo y botas)
   }
 
   preload() {
@@ -190,11 +191,9 @@ class MainScene extends Phaser.Scene {
 
     const fallTime = 8000;
     const distance = this.scale.height * 1.5;
-    const gravity = 20;
-    const initialVelocity = (distance - 0.5 * gravity * (fallTime * fallTime) / 1000000) / (fallTime / 1000);
+    const initialVelocity = (distance - 0.5 * 1000 * (fallTime * fallTime) / 1000000) / (fallTime / 1000);
     const slowMotionFactor = 0.8;
     object.body.setVelocityY(initialVelocity * slowMotionFactor);
-
     object.setData('type', type);
     this.fallingObjects.add(object);
     object.alias = type === 'damage' ? 'Ladrillo' : 'DC3';
@@ -203,12 +202,16 @@ class MainScene extends Phaser.Scene {
 
   spawnFallingDamageObject() {
     const damage = this.spawnFallingObject('damage', 0xff0000, [0, 0]);
-    if (damage) damage.body.gravity.y = 20;
+    if (damage) {
+      damage.body.gravity.y = this.specialObjectsGravity;
+    }
   }
 
   spawnScoreBonusObject() {
     const score = this.spawnFallingObject('score', 0x0000ff, [0, 0]);
-    if (score) score.body.gravity.y = 20;
+    if (score) {
+      score.body.gravity.y = this.specialObjectsGravity;
+    }
   }
 
   spawnShieldObject() {
@@ -218,7 +221,7 @@ class MainScene extends Phaser.Scene {
     const shield = this.add.rectangle(x, y, 20, 20, 0xffff00);
     this.physics.add.existing(shield);
     shield.body.setImmovable(true);
-    shield.body.gravity.y = 50;
+    shield.body.gravity.y = this.specialObjectsGravity; 
     this.shieldObjects.add(shield);
     this.shieldObject = shield;
     shield.alias = 'Casco';
@@ -231,7 +234,7 @@ class MainScene extends Phaser.Scene {
     const boots = this.add.rectangle(x, y, 20, 20, 0x00ff00);
     this.physics.add.existing(boots);
     boots.body.setImmovable(true);
-    boots.body.gravity.y = 50;
+    boots.body.gravity.y = this.specialObjectsGravity; 
     this.bootsObjects.add(boots);
     this.bootsObject = boots;
     boots.alias = 'Botas';
@@ -406,7 +409,7 @@ const config = {
   physics: {
     default: 'arcade',
     arcade: {
-      gravity: { y: 1000 },
+      gravity: { y: 1000 }, // Gravedad global del juego para el jugador y las plataformas
       debug: false
     }
   },
