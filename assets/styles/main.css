@@ -32,7 +32,6 @@ canvas {
   justify-content: space-between;
   padding: 0 40px;
   pointer-events: none;
-  /* evita que bloqueen canvas */
 }
 
 #mobile-controls button {
@@ -46,14 +45,6 @@ canvas {
   touch-action: manipulation;
   user-select: none;
 }
-
-
-
-
-
-
-
-
 
 #pause-btn {
   position: absolute;
