@@ -27,12 +27,20 @@ class MainScene extends Phaser.Scene {
         this.platformTypes = ['static', 'bomb'];
         this.platforms = null;
         this.bombPlatformPercentage = 0.15;
-        this.jumpSound = null; // Agregamos una variable para el sonido de salto
+        // Agregamos variables para los sonidos
+        this.jumpSound = null; 
+        this.cortinillaSound = null; 
+        this.hitSound = null; 
+        this.pickupSound = null; 
     }
 
     preload() {
         this.load.image('sky', 'assets/sky.png');
-        this.load.audio('jump', 'assets/sounds/jump.wav'); // Cargamos el archivo de sonido
+        // Cargamos los archivos de sonido
+        this.load.audio('jump', 'assets/sounds/jump.wav'); 
+        this.load.audio('star', 'assets/sounds/Cortinilla.wav'); 
+        this.load.audio('hit', 'assets/sounds/hitHurt.wav'); 
+        this.load.audio('pickup', 'assets/sounds/pickup.wav'); 
     }
 
     create() {
@@ -51,13 +59,21 @@ class MainScene extends Phaser.Scene {
         this.setupCamera();
         this.setupCollisions();
         this.setupPauseButton();
-        this.setupSounds(); // Llamamos a la función para configurar los sonidos
+        this.setupSounds();
     }
 
     setupBackground() {
         this.bg = this.add.tileSprite(0, 0, this.scale.width, this.scale.height * 2, 'sky')
             .setOrigin(0, 1)
             .setScrollFactor(0);
+    }
+
+    setupSounds() {
+        this.jumpSound = this.sound.add('jump');
+        this.starSound = this.sound.add('star');
+        this.hitSound = this.sound.add('hit');
+        this.pickupSound = this.sound.add('pickup');
+
     }
 
     setupText() {
@@ -210,10 +226,10 @@ class MainScene extends Phaser.Scene {
         this.physics.add.existing(object);
         object.body.setCircle(10);
 
-        const fallTime = 8000;
+        const fallTime = 50000; // Tiempo de caída para hacerlos más lentos
         const distance = this.scale.height * 1.5;
         const initialVelocity = (distance - 0.5 * 1000 * (fallTime * fallTime) / 1000000) / (fallTime / 1000);
-        const slowMotionFactor = 0.8;
+        const slowMotionFactor = 0.2; // Factor de cámara lenta
         object.body.setVelocityY(initialVelocity * slowMotionFactor);
         object.setData('type', type);
         this.fallingObjects.add(object);
@@ -266,17 +282,21 @@ class MainScene extends Phaser.Scene {
 
         const type = fallingObject.getData('type');
         if (type === 'damage') {
+            this.hitSound.play();
+
             if (this.hasShield) {
                 this.hasShield = false;
                 this.player.fillColor = this.playerColor;
                 this.shieldObject?.destroy();
                 this.shieldObject = null;
+                this.hitSound.play();
             } else {
                 this.endGame();
             }
         } else if (type === 'score') {
             this.score += 10;
             this.scoreText.setText('Puntos: ' + this.score);
+            this.pickupSound.play();
         }
 
         fallingObject.destroy();
@@ -288,6 +308,7 @@ class MainScene extends Phaser.Scene {
             this.player.fillColor = 0xffff00;
             shield.destroy();
             this.shieldObject = null;
+            this.pickupSound.play();
         }
     }
 
@@ -302,6 +323,7 @@ class MainScene extends Phaser.Scene {
             this.bootsObject = null;
             this.score += 3;
             this.scoreText.setText('Puntos: ' + this.score);
+            this.pickupSound.play();
         }
     }
 
@@ -327,10 +349,6 @@ class MainScene extends Phaser.Scene {
         this.handleBootsSpawning(delta);
         this.handleBootsEffect(delta);
         this.bg.tilePositionY = this.cameras.main.scrollY;
-    }
-
-    setupSounds() {
-        this.jumpSound = this.sound.add('jump');
     }
 
     handlePlayerMovement() {
