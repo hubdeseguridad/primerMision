@@ -233,18 +233,35 @@ class MainScene extends Phaser.Scene {
     }
 
     handlePlayerMovement() {
-        const moveSpeed = 200;
-        const screenWidth = this.scale.width;
+    const moveSpeed = 200;
+    const screenWidth = this.scale.width;
 
-        this.player.body.setVelocityX(
-            (this.cursors.left.isDown || this.leftPressed) ? -moveSpeed :
-                (this.cursors.right.isDown || this.rightPressed) ? moveSpeed : 0
-        );
+    let velocityX = 0;
 
-        const halfWidth = this.player.width / 2;
-        if (this.player.x < -halfWidth) this.player.x = screenWidth + halfWidth;
-        else if (this.player.x > screenWidth + halfWidth) this.player.x = -halfWidth;
+    if (this.isMobileDevice()) {
+        // En móviles: usar botones o touch
+        if (this.leftPressed) {
+            velocityX = -moveSpeed;
+        } else if (this.rightPressed) {
+            velocityX = moveSpeed;
+        }
+    } else {
+        // En PC: usar teclas del teclado
+        if (this.cursors.left.isDown) {
+            velocityX = -moveSpeed;
+        } else if (this.cursors.right.isDown) {
+            velocityX = moveSpeed;
+        }
     }
+
+    this.player.body.setVelocityX(velocityX);
+
+    // Envolvimiento horizontal
+    const halfWidth = this.player.width / 2;
+    if (this.player.x < -halfWidth) this.player.x = screenWidth + halfWidth;
+    else if (this.player.x > screenWidth + halfWidth) this.player.x = -halfWidth;
+}
+
 
     /*  -----------------------
             Platforms   
