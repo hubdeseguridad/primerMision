@@ -14,10 +14,10 @@ class MainScene extends Phaser.Scene {
         this.hasBoots = false;
         this.originalPlayerJumpSpeed = -550;
         this.timers = {
-            damageObject: { elapsed: 0, interval: Phaser.Math.Between(5000, 10000) },
-            scoreBonus: { elapsed: 0, interval: Phaser.Math.Between(10000, 15000) },
-            shieldObject: { elapsed: 0, interval: 13000 },
-            bootsObject: { elapsed: 0, interval: Phaser.Math.Between(8000, 12000) },
+            damageObject: { elapsed: 0, interval: Phaser.Math.Between(8000, 12000) },
+            scoreBonus: { elapsed: 0, interval: 10000 },
+            shieldObject: { elapsed: 0, interval: 18000 },
+            bootsObject: { elapsed: 0, interval: 15000 },
             bootsEffect: { elapsed: 0, duration: 5000 }
         };
         this.shieldObject = null;
@@ -113,21 +113,9 @@ class MainScene extends Phaser.Scene {
     }
 
     setupTouchControls() {
-    if (this.isMobileDevice()) {
-        this.input.on('pointerdown', (pointer) => {
-            const mid = this.scale.width / 2;
-            if (pointer.x < mid) {
-                this.leftPressed = true;
-                this.rightPressed = false;
-            } else {
-                this.leftPressed = false;
-                this.rightPressed = true;
-            }
-        });
-
-        this.input.on('pointermove', (pointer) => {
-            const mid = this.scale.width / 2;
-            if (pointer.isDown) {
+        if (this.isMobileDevice()) {
+            this.input.on('pointerdown', (pointer) => {
+                const mid = this.scale.width / 2;
                 if (pointer.x < mid) {
                     this.leftPressed = true;
                     this.rightPressed = false;
@@ -135,29 +123,41 @@ class MainScene extends Phaser.Scene {
                     this.leftPressed = false;
                     this.rightPressed = true;
                 }
+            });
+
+            this.input.on('pointermove', (pointer) => {
+                const mid = this.scale.width / 2;
+                if (pointer.isDown) {
+                    if (pointer.x < mid) {
+                        this.leftPressed = true;
+                        this.rightPressed = false;
+                    } else {
+                        this.leftPressed = false;
+                        this.rightPressed = true;
+                    }
+                }
+            });
+
+            this.input.on('pointerup', () => {
+                this.leftPressed = false;
+                this.rightPressed = false;
+            });
+        } else {
+            // Soporte para controles de escritorio
+            const setButtonState = (btn, state) => {
+                ['pointerdown', 'pointerup', 'pointerout', 'pointercancel'].forEach(event =>
+                    btn?.addEventListener(event, () => this[state] = event === 'pointerdown')
+                );
+            };
+
+            const leftBtn = document.getElementById('left-btn');
+            const rightBtn = document.getElementById('right-btn');
+            if (leftBtn && rightBtn) {
+                setButtonState(leftBtn, 'leftPressed');
+                setButtonState(rightBtn, 'rightPressed');
             }
-        });
-
-        this.input.on('pointerup', () => {
-            this.leftPressed = false;
-            this.rightPressed = false;
-        });
-    } else {
-        // Soporte para controles de escritorio
-        const setButtonState = (btn, state) => {
-            ['pointerdown', 'pointerup', 'pointerout', 'pointercancel'].forEach(event =>
-                btn?.addEventListener(event, () => this[state] = event === 'pointerdown')
-            );
-        };
-
-        const leftBtn = document.getElementById('left-btn');
-        const rightBtn = document.getElementById('right-btn');
-        if (leftBtn && rightBtn) {
-            setButtonState(leftBtn, 'leftPressed');
-            setButtonState(rightBtn, 'rightPressed');
         }
     }
-}
 
 
     setupCollisions() {
@@ -233,34 +233,34 @@ class MainScene extends Phaser.Scene {
     }
 
     handlePlayerMovement() {
-    const moveSpeed = 200;
-    const screenWidth = this.scale.width;
+        const moveSpeed = 200;
+        const screenWidth = this.scale.width;
 
-    let velocityX = 0;
+        let velocityX = 0;
 
-    if (this.isMobileDevice()) {
-        // En móviles: usar botones o touch
-        if (this.leftPressed) {
-            velocityX = -moveSpeed;
-        } else if (this.rightPressed) {
-            velocityX = moveSpeed;
+        if (this.isMobileDevice()) {
+            // En móviles: usar botones o touch
+            if (this.leftPressed) {
+                velocityX = -moveSpeed;
+            } else if (this.rightPressed) {
+                velocityX = moveSpeed;
+            }
+        } else {
+            // En PC: usar teclas del teclado
+            if (this.cursors.left.isDown) {
+                velocityX = -moveSpeed;
+            } else if (this.cursors.right.isDown) {
+                velocityX = moveSpeed;
+            }
         }
-    } else {
-        // En PC: usar teclas del teclado
-        if (this.cursors.left.isDown) {
-            velocityX = -moveSpeed;
-        } else if (this.cursors.right.isDown) {
-            velocityX = moveSpeed;
-        }
+
+        this.player.body.setVelocityX(velocityX);
+
+        // Envolvimiento horizontal
+        const halfWidth = this.player.width / 2;
+        if (this.player.x < -halfWidth) this.player.x = screenWidth + halfWidth;
+        else if (this.player.x > screenWidth + halfWidth) this.player.x = -halfWidth;
     }
-
-    this.player.body.setVelocityX(velocityX);
-
-    // Envolvimiento horizontal
-    const halfWidth = this.player.width / 2;
-    if (this.player.x < -halfWidth) this.player.x = screenWidth + halfWidth;
-    else if (this.player.x > screenWidth + halfWidth) this.player.x = -halfWidth;
-}
 
 
     /*  -----------------------
@@ -286,13 +286,25 @@ class MainScene extends Phaser.Scene {
             .setOrigin(0.5)
             .setDisplaySize(60, 20)
             .refreshBody();
-        platform.gfx = this.add.rectangle(x, y, 60, 20, this.getPlatformColor(type));
-        platform.isOneWay = true;
+
+        const gfx = this.add.rectangle(x, y, 60, 20, this.getPlatformColor(type));
+        gfx.setDepth(1); // Opcional: controla que el jugador esté arriba
+
+        platform.gfx = gfx;
+        platform.update = () => {
+            gfx.setPosition(platform.x, platform.y);
+        };
+
         platform.type = type;
+        platform.isOneWay = true;
+
         if (type === 'bomb') {
             platform.timer = null;
         }
+
+        return platform;
     }
+
 
     getPlatformColor(type) {
         switch (type) {
@@ -536,7 +548,12 @@ class MainScene extends Phaser.Scene {
         this.handleShieldSpawning(delta);
         this.handleBootsSpawning(delta);
         this.handleBootsEffect(delta);
-        this.bg.tilePositionY = this.cameras.main.scrollY;
+        this.bg.tilePositionY = this.cameras.main.scrollY; 
+        this.platforms.children.iterate(platform => {
+            if (platform && platform.update) {
+                platform.update();
+            }
+        });
     }
 }
 
