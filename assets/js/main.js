@@ -113,9 +113,40 @@ class MainScene extends Phaser.Scene {
     }
 
     setupTouchControls() {
+    if (this.isMobileDevice()) {
+        this.input.on('pointerdown', (pointer) => {
+            const mid = this.scale.width / 2;
+            if (pointer.x < mid) {
+                this.leftPressed = true;
+                this.rightPressed = false;
+            } else {
+                this.leftPressed = false;
+                this.rightPressed = true;
+            }
+        });
+
+        this.input.on('pointermove', (pointer) => {
+            const mid = this.scale.width / 2;
+            if (pointer.isDown) {
+                if (pointer.x < mid) {
+                    this.leftPressed = true;
+                    this.rightPressed = false;
+                } else {
+                    this.leftPressed = false;
+                    this.rightPressed = true;
+                }
+            }
+        });
+
+        this.input.on('pointerup', () => {
+            this.leftPressed = false;
+            this.rightPressed = false;
+        });
+    } else {
+        // Soporte para controles de escritorio
         const setButtonState = (btn, state) => {
             ['pointerdown', 'pointerup', 'pointerout', 'pointercancel'].forEach(event =>
-                btn.addEventListener(event, () => this[state] = event === 'pointerdown')
+                btn?.addEventListener(event, () => this[state] = event === 'pointerdown')
             );
         };
 
@@ -126,6 +157,8 @@ class MainScene extends Phaser.Scene {
             setButtonState(rightBtn, 'rightPressed');
         }
     }
+}
+
 
     setupCollisions() {
         this.physics.add.overlap(this.player, this.fallingObjects, this.handleFallingObjectCollision, null, this);
@@ -176,6 +209,10 @@ class MainScene extends Phaser.Scene {
             fontSize: '32px',
             fill: '#fff'
         }).setOrigin(0.5);
+    }
+
+    isMobileDevice() {
+        return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     }
 
     /*  -----------------------
