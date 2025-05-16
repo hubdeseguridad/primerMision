@@ -36,6 +36,15 @@ class MainScene extends Phaser.Scene {
 
     preload() {
         this.load.image('sky', 'assets/sky.png');
+
+        // Cargamos archivos de hubito
+        this.load.image('hubito', 'assets/img/hubito01.png');
+        this.load.image('hubito2', 'assets/img/hubito02.png');
+        this.load.image('hubitojump', 'assets/img/hubitojump.png');
+
+        // Cargamos archivos de objetos
+        this.load.image('brick', 'assets/img/brick.png');
+
         // Cargamos los archivos de sonido
         this.load.audio('jump', 'assets/sounds/jump.wav');
         this.load.audio('star', 'assets/sounds/Cortinilla.wav');
@@ -81,22 +90,45 @@ class MainScene extends Phaser.Scene {
     }
 
     setupText() {
-        this.startText = this.add.text(this.scale.width / 2, this.scale.height / 2, 'Presiona espacio o toca para comenzar', {
-            fontSize: '15px',
-            fill: '#000',
-            padding: { x: 10, y: 6 },
-            align: 'center'
-        }).setOrigin(0.5);
+        const startTextContent = 'Presiona la tecla “Espacio” o da clic en la pantalla para comenzar.';
+        const maxWidth = this.scale.width * 0.9;
+        this.startText = this.add.text(
+            this.scale.width / 2,
+            this.scale.height / 2,
+            startTextContent,
+            {
+                fontSize: '12px',
+                fontFamily: '"Press Start 2P", monospace',
+                fill: '#000',
+                padding: { x: 10, y: 6 },
+                align: 'center',
+                wordWrap: { width: maxWidth, useAdvancedWrap: true }
+            }
+        ).setOrigin(0.5).setDepth(1000); // Z-index alto para estar por encima de todos
 
-        this.scoreText = this.add.text(10, 10, 'Puntos: 0', {
-            fontSize: '18px',
-            fill: '#000',
+        this.scoreLabel = this.add.text(10, 10, 'Puntos:', {
+            fontSize: '13px',
+            fontFamily: '"Press Start 2P", monospace',
+            fontStyle: 'bold',
+            fontWeight: '400',
+            fill: '#fff',
+            backgroundColor: '#2A67FB',
+            padding: { x: 10, y: 5 }
+        }).setScrollFactor(0).setDepth(10);
+
+        this.scoreText = this.add.text(this.scoreLabel.x + this.scoreLabel.width, 10, '0', {
+            fontSize: '13px',
+            fontFamily: '"Press Start 2P", monospace',
+            fontStyle: 'bold',
+            fontWeight: '400',
+            fill: '#2A67FB',
+            backgroundColor: '#fff',
             padding: { x: 10, y: 5 }
         }).setScrollFactor(0).setDepth(10);
     }
 
-    /*  -----------------------
-            Game State   
+    /* -----------------------
+            Game State
         -----------------------
     */
     setupCamera() {
@@ -195,9 +227,10 @@ class MainScene extends Phaser.Scene {
             this.cortinillaSound.stop();
         }
 
-        this.startText.destroy();               // Eliminar texto de inicio
+        this.startText.destroy();           // Eliminar texto de inicio
         this.player.body.allowGravity = true;  // Activar gravedad
         this.player.body.setVelocityY(-550);   // Primer salto
+        this.player.setTexture('hubitojump'); // Cambiar a imagen de salto inicial
     }
 
     endGame() {
@@ -215,22 +248,78 @@ class MainScene extends Phaser.Scene {
         return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     }
 
-    /*  -----------------------
-            Player   
+    /* -----------------------
+            Player
         -----------------------
     */
 
     setupPlayer() {
         const bottomPlatform = this.platforms.getChildren()[0];
-        this.player = this.physics.add.existing(
-            this.add.rectangle(bottomPlatform.x, bottomPlatform.y - 40, 30, 30, 0x0000aa)
+
+        // Crear el sprite del jugador usando la imagen cargada
+        this.player = this.physics.add.sprite(
+            bottomPlatform.x,
+            bottomPlatform.y - 40,
+            'hubito'
         );
-        this.player.body.setCollideWorldBounds(false).setBounce(0).allowGravity = false;
+
+        // Configuraciones físicas
+        this.player.setCollideWorldBounds(false);
+        this.player.setBounce(0);
+        this.player.body.allowGravity = false;
+
+        // Datos personalizados
         this.player.setData('isAlive', true);
         this.maxPlayerY = this.player.y;
+
+        // Opcional: guardar color original por si luego quieres usarlo
         this.playerColor = 0x0000aa;
+
+        // Velocidad de salto
         this.originalPlayerJumpSpeed = -550;
+
+        this.player.scale = 1.3;
     }
+
+    /* Codigo a prueba para el movimiento del jugador
+    
+        handlePlayerMovement() {
+            const moveSpeed = 200;
+            const screenWidth = this.scale.width;
+    
+            let velocityX = 0;
+    
+            if (this.isMobileDevice()) {
+                // En móviles: usar botones o touch
+                if (this.leftPressed) {
+                    velocityX = -moveSpeed;
+                } else if (this.rightPressed) {
+                    velocityX = moveSpeed;
+                }
+            } else {
+                // En PC: usar teclas del teclado
+                if (this.cursors.left.isDown) {
+                    velocityX = -moveSpeed;
+                } else if (this.cursors.right.isDown) {
+                    velocityX = moveSpeed;
+                }
+            }
+    
+            this.player.body.setVelocityX(velocityX);
+    
+            // Envolvimiento horizontal
+            const halfWidth = this.player.width / 2;
+            if (this.player.x < -halfWidth) this.player.x = screenWidth + halfWidth;
+            else if (this.player.x > screenWidth + halfWidth) this.player.x = -halfWidth;
+    
+            // Cambiar imagen si no está saltando y hay movimiento horizontal
+            if (this.player.body.velocity.y === 0 && velocityX !== 0) {
+                this.player.setTexture('hubito2');
+            } else if (this.player.body.velocity.y === 0 && velocityX === 0) {
+                this.player.setTexture('hubito');
+            }
+        } 
+*/
 
     handlePlayerMovement() {
         const moveSpeed = 200;
@@ -260,11 +349,33 @@ class MainScene extends Phaser.Scene {
         const halfWidth = this.player.width / 2;
         if (this.player.x < -halfWidth) this.player.x = screenWidth + halfWidth;
         else if (this.player.x > screenWidth + halfWidth) this.player.x = -halfWidth;
+
+        // Control de la imagen y el espejo basado en la velocidad horizontal
+        if (this.player.body.velocity.y !== 0) {
+            // En el aire (saltando o cayendo)
+            this.player.setTexture('hubitojump');
+            if (this.player.body.velocity.x > 0) {
+                this.player.setScale(-1.3, 1.3); // Espejar a la derecha
+            } else {
+                this.player.setScale(1.3, 1.3);  // Normal a la izquierda o vertical
+            }
+        } else {
+            // En el suelo
+            if (velocityX < 0) {
+                this.player.setTexture('hubito2'); // Imagen de movimiento izquierda
+                this.player.setScale(1.3, 1.3);
+            } else if (velocityX > 0) {
+                this.player.setTexture('hubito2'); // Imagen de movimiento derecha
+                this.player.setScale(-1.3, 1.3); // Espejar a la derecha
+            } else {
+                this.player.setTexture('hubito'); // Imagen estática
+                this.player.setScale(1.3, 1.3);
+            }
+        }
     }
 
-
-    /*  -----------------------
-            Platforms   
+    /* -----------------------
+            Platforms
         -----------------------
     */
 
@@ -327,10 +438,11 @@ class MainScene extends Phaser.Scene {
         this.physics.overlap(this.player, this.platforms, (player, platform) => {
             if (platform.isOneWay && player.body.velocity.y > 0 && Math.abs(player.body.bottom - platform.body.top) < 10) {
                 player.body.setVelocityY(-550);
+                player.setTexture('hubitojump'); // Cambiar a imagen de salto
                 this.jumpSound.play(); // Reproducir el sonido de salto aquí
                 if (platform.y < this.lastTouchedPlatformY) {
                     this.lastTouchedPlatformY = platform.y;
-                    this.scoreText.setText('Puntos: ' + (++this.score));
+                    this.scoreText.setText('' + (++this.score));
                 }
 
                 if (platform.type === 'bomb') {
@@ -397,10 +509,17 @@ class MainScene extends Phaser.Scene {
     }
 
     spawnFallingDamageObject() {
-        const damage = this.spawnFallingObject('damage', 0xff0000, [0, 0]);
-        if (damage) {
-            damage.body.gravity.y = this.specialObjectsGravity;
-        }
+        const x = Phaser.Math.Between(30, this.scale.width - 30);
+        const y = this.cameras.main.scrollY - this.scale.height * 1.5;
+        const brick = this.physics.add.sprite(x, y, 'brick');
+        brick.setScale(1.3); 
+        brick.body.setCircle((brick.width * 2) / 20);
+        brick.body.gravity.y = 1;
+
+        brick.setData('type', 'damage');
+        this.fallingObjects.add(brick);
+        brick.alias = 'Ladrillo';
+        return brick;
     }
 
     spawnScoreBonusObject() {
@@ -454,7 +573,7 @@ class MainScene extends Phaser.Scene {
             }
         } else if (type === 'score') {
             this.score += 10;
-            this.scoreText.setText('Puntos: ' + this.score);
+            this.scoreText.setText('' + this.score);
             this.pickupSound.play();
         }
 
@@ -481,7 +600,7 @@ class MainScene extends Phaser.Scene {
             this.bootsObject.destroy();
             this.bootsObject = null;
             this.score += 3;
-            this.scoreText.setText('Puntos: ' + this.score);
+            this.scoreText.setText('' + this.score);
             this.pickupSound.play();
         }
     }
@@ -548,7 +667,7 @@ class MainScene extends Phaser.Scene {
         this.handleShieldSpawning(delta);
         this.handleBootsSpawning(delta);
         this.handleBootsEffect(delta);
-        this.bg.tilePositionY = this.cameras.main.scrollY; 
+        this.bg.tilePositionY = this.cameras.main.scrollY;
         this.platforms.children.iterate(platform => {
             if (platform && platform.update) {
                 platform.update();
