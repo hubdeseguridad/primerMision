@@ -56,6 +56,7 @@ class MainScene extends Phaser.Scene {
         this.setupScene();
         this.setupControls();
         this.setupSounds();
+        this.setupScoreIndicators(); // Función para crear los indicadores de puntaje
     }
 
     setupScene() {
@@ -125,6 +126,24 @@ class MainScene extends Phaser.Scene {
             backgroundColor: '#fff',
             padding: { x: 10, y: 5 }
         }).setScrollFactor(0).setDepth(10);
+    }
+
+    setupScoreIndicators() {
+        const squareSize = 20;
+        const padding = 5;
+        const startX = this.scale.width - (3 * squareSize + 2 * padding) - 10; // Posición inicial en la derecha
+        const startY = 10;
+        const colorGray = 0x808080; // Código hexadecimal para gris
+        const colorBlue = 0x2A67FB; // Código hexadecimal para el azul
+
+        this.scoreIndicators = [
+            this.add.rectangle(startX, startY, squareSize, squareSize, colorGray).setOrigin(0, 0).setScrollFactor(0).setDepth(10), // Izquierda
+            this.add.rectangle(startX + squareSize + padding, startY, squareSize, squareSize, colorGray).setOrigin(0, 0).setScrollFactor(0).setDepth(10), // Centro
+            this.add.rectangle(startX + 2 * (squareSize + padding), startY, squareSize, squareSize, colorGray).setOrigin(0, 0).setScrollFactor(0).setDepth(10)  // Derecha
+        ];
+
+        this.scoreThresholds = [25, 50, 100]; // Puntajes para cambiar de color
+        this.indicatorColors = Array(3).fill(colorGray); // Estado inicial de los colores
     }
 
     /* -----------------------
@@ -322,70 +341,70 @@ class MainScene extends Phaser.Scene {
 */
 
     handlePlayerMovement() {
-    const moveSpeed = 200;
-    const screenWidth = this.scale.width;
-    const deathThreshold = this.cameras.main.scrollY + this.scale.height * 0.8; // Umbral para considerar que está cayendo a la muerte
+        const moveSpeed = 200;
+        const screenWidth = this.scale.width;
+        const deathThreshold = this.cameras.main.scrollY + this.scale.height * 0.8; // Umbral para considerar que está cayendo a la muerte
 
-    let velocityX = 0;
+        let velocityX = 0;
 
-    if (this.isMobileDevice()) {
-        if (this.leftPressed) {
-            velocityX = -moveSpeed;
-        } else if (this.rightPressed) {
-            velocityX = moveSpeed;
+        if (this.isMobileDevice()) {
+            if (this.leftPressed) {
+                velocityX = -moveSpeed;
+            } else if (this.rightPressed) {
+                velocityX = moveSpeed;
+            }
+        } else {
+            if (this.cursors.left.isDown) {
+                velocityX = -moveSpeed;
+            } else if (this.cursors.right.isDown) {
+                velocityX = moveSpeed;
+            }
         }
-    } else {
-        if (this.cursors.left.isDown) {
-            velocityX = -moveSpeed;
-        } else if (this.cursors.right.isDown) {
-            velocityX = moveSpeed;
+
+        this.player.body.setVelocityX(velocityX);
+
+        const isFallingToDeath = this.player.y > deathThreshold && this.player.body.velocity.y > 0;
+
+        // Control de la imagen y el espejo basado en la velocidad horizontal y vertical
+        if (this.player.body.velocity.y < 0) {
+            // Saltando
+            this.player.setTexture('hubitojump');
+            if (this.player.body.velocity.x > 0) {
+                this.player.setScale(-1.3, 1.3);
+            } else {
+                this.player.setScale(1.3, 1.3);
+            }
+        } else if (this.player.body.velocity.y > 0) {
+            // Cayendo
+            if (isFallingToDeath) {
+                this.player.setTexture('hubito2'); // Cambia a 'hubito2' al caer a la muerte
+            } else {
+                this.player.setTexture('hubito'); // Mantiene 'hubito' en caídas normales
+            }
+            if (this.player.body.velocity.x > 0) {
+                this.player.setScale(-1.3, 1.3);
+            } else {
+                this.player.setScale(1.3, 1.3);
+            }
+        } else {
+            // En el suelo
+            if (velocityX < 0) {
+                this.player.setTexture('hubito2');
+                this.player.setScale(1.3, 1.3);
+            } else if (velocityX > 0) {
+                this.player.setTexture('hubito2');
+                this.player.setScale(-1.3, 1.3);
+            } else {
+                this.player.setTexture('hubito');
+                this.player.setScale(1.3, 1.3);
+            }
         }
+
+        // Envolvimiento horizontal (se mantiene igual)
+        const halfWidth = this.player.width / 2;
+        if (this.player.x < -halfWidth) this.player.x = screenWidth + halfWidth;
+        else if (this.player.x > screenWidth + halfWidth) this.player.x = -halfWidth;
     }
-
-    this.player.body.setVelocityX(velocityX);
-
-    const isFallingToDeath = this.player.y > deathThreshold && this.player.body.velocity.y > 0;
-
-    // Control de la imagen y el espejo basado en la velocidad horizontal y vertical
-    if (this.player.body.velocity.y < 0) {
-        // Saltando
-        this.player.setTexture('hubitojump');
-        if (this.player.body.velocity.x > 0) {
-            this.player.setScale(-1.3, 1.3);
-        } else {
-            this.player.setScale(1.3, 1.3);
-        }
-    } else if (this.player.body.velocity.y > 0) {
-        // Cayendo
-        if (isFallingToDeath) {
-            this.player.setTexture('hubito2'); // Cambia a 'hubito2' al caer a la muerte
-        } else {
-            this.player.setTexture('hubito'); // Mantiene 'hubito' en caídas normales
-        }
-        if (this.player.body.velocity.x > 0) {
-            this.player.setScale(-1.3, 1.3);
-        } else {
-            this.player.setScale(1.3, 1.3);
-        }
-    } else {
-        // En el suelo
-        if (velocityX < 0) {
-            this.player.setTexture('hubito2');
-            this.player.setScale(1.3, 1.3);
-        } else if (velocityX > 0) {
-            this.player.setTexture('hubito2');
-            this.player.setScale(-1.3, 1.3);
-        } else {
-            this.player.setTexture('hubito');
-            this.player.setScale(1.3, 1.3);
-        }
-    }
-
-    // Envolvimiento horizontal (se mantiene igual)
-    const halfWidth = this.player.width / 2;
-    if (this.player.x < -halfWidth) this.player.x = screenWidth + halfWidth;
-    else if (this.player.x > screenWidth + halfWidth) this.player.x = -halfWidth;
-}
 
     /* -----------------------
             Platforms
@@ -525,7 +544,7 @@ class MainScene extends Phaser.Scene {
         const x = Phaser.Math.Between(30, this.scale.width - 30);
         const y = this.cameras.main.scrollY - this.scale.height * 1.5;
         const brick = this.physics.add.sprite(x, y, 'brick');
-        brick.setScale(1.3); 
+        brick.setScale(1.3);
         brick.body.setCircle((brick.width * 2) / 20);
         brick.body.gravity.y = 1;
 
@@ -686,6 +705,18 @@ class MainScene extends Phaser.Scene {
                 platform.update();
             }
         });
+
+        this.updateScoreIndicators(); // Nueva función para actualizar los indicadores de puntaje
+    }
+
+    updateScoreIndicators() {
+        const colorBlue = 0x2A67FB;
+        for (let i = 0; i < this.scoreThresholds.length; i++) {
+            if (this.score >= this.scoreThresholds[i] && this.indicatorColors[i] !== colorBlue) {
+                this.scoreIndicators[i].fillColor = colorBlue;
+                this.indicatorColors[i] = colorBlue;
+            }
+        }
     }
 }
 
