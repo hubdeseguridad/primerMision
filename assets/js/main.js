@@ -41,6 +41,7 @@ class MainScene extends Phaser.Scene {
         this.load.image('hubito', 'assets/img/hubito01.png');
         this.load.image('hubito2', 'assets/img/hubito02.png');
         this.load.image('hubitojump', 'assets/img/hubitojump.png');
+        this.load.image('hubitojump2', 'assets/img/hubitojump2.png');
 
         // Cargamos archivos de objetos
         this.load.image('brick', 'assets/img/brick.png');
@@ -254,9 +255,9 @@ class MainScene extends Phaser.Scene {
 
     endGame() {
         this.player.setData('isAlive', false);
+        this.physics.pause();
         this.player.body.setVelocityY(0);
         this.player.body.allowGravity = false;
-        this.physics.pause();
         this.add.text(this.scale.width / 2, this.scale.height / 2, '¡Game Over!', {
             fontSize: '32px',
             fill: '#fff'
@@ -266,6 +267,14 @@ class MainScene extends Phaser.Scene {
     isMobileDevice() {
         return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     }
+
+    showGameOver() {
+    this.add.text(this.scale.width / 2, this.scale.height / 2, '¡Game Over!', {
+        fontSize: '32px',
+        fill: '#fff',
+        fontFamily: '"Press Start 2P", monospace'
+    }).setOrigin(0.5).setDepth(100);
+}
 
     /* -----------------------
             Player
@@ -343,7 +352,7 @@ class MainScene extends Phaser.Scene {
     handlePlayerMovement() {
         const moveSpeed = 200;
         const screenWidth = this.scale.width;
-        const deathThreshold = this.cameras.main.scrollY + this.scale.height * 0.8; // Umbral para considerar que está cayendo a la muerte
+        const deathThreshold = this.cameras.main.scrollY + this.scale.height * 0.8;
 
         let velocityX = 0;
 
@@ -365,26 +374,20 @@ class MainScene extends Phaser.Scene {
 
         const isFallingToDeath = this.player.y > deathThreshold && this.player.body.velocity.y > 0;
 
-        // Control de la imagen y el espejo basado en la velocidad horizontal y vertical
+        // Control de la imagen basado en la velocidad horizontal y vertical
         if (this.player.body.velocity.y < 0) {
             // Saltando
-            this.player.setTexture('hubitojump');
             if (this.player.body.velocity.x > 0) {
-                this.player.setScale(-1.3, 1.3);
+                this.player.setTexture('hubitojump2'); // Usar hubitojump2 al saltar a la derecha
             } else {
-                this.player.setScale(1.3, 1.3);
+                this.player.setTexture('hubitojump'); // Usar hubitojump al saltar a la izquierda o vertical
             }
         } else if (this.player.body.velocity.y > 0) {
             // Cayendo
             if (isFallingToDeath) {
-                this.player.setTexture('hubito2'); // Cambia a 'hubito2' al caer a la muerte
+                this.player.setTexture('hubito2');
             } else {
-                this.player.setTexture('hubito'); // Mantiene 'hubito' en caídas normales
-            }
-            if (this.player.body.velocity.x > 0) {
-                this.player.setScale(-1.3, 1.3);
-            } else {
-                this.player.setScale(1.3, 1.3);
+                this.player.setTexture('hubito');
             }
         } else {
             // En el suelo
@@ -588,29 +591,55 @@ class MainScene extends Phaser.Scene {
     }
 
     handleFallingObjectCollision(player, fallingObject) {
-        if (!player.getData('isAlive')) return;
+    if (!player.getData('isAlive')) return;
 
-        const type = fallingObject.getData('type');
-        if (type === 'damage') {
+    const type = fallingObject.getData('type');
+    if (type === 'damage') {
+        this.hitSound.play();
+
+        if (this.hasShield) {
+            this.hasShield = false;
+            this.player.fillColor = this.playerColor;
+            this.shieldObject?.destroy();
+            this.shieldObject = null;
             this.hitSound.play();
+            fallingObject.destroy();
+        } else {
+            // --- Nueva lógica de muerte por ladrillo con Game Over y caída ---
+            this.player.setData('isAlive', false); // Marcar al jugador como no vivo
 
-            if (this.hasShield) {
-                this.hasShield = false;
-                this.player.fillColor = this.playerColor;
-                this.shieldObject?.destroy();
-                this.shieldObject = null;
-                this.hitSound.play();
-            } else {
-                this.endGame();
-            }
-        } else if (type === 'score') {
-            this.score += 10;
-            this.scoreText.setText('' + this.score);
-            this.pickupSound.play();
+            // Congelar al jugador
+            player.body.setVelocityX(0);
+            player.body.allowGravity = false;
+
+            // Pequeño salto
+            this.tweens.add({
+                targets: player,
+                y: player.y - 30,
+                duration: 200,
+                ease: 'Sine.out',
+                onComplete: () => {
+                    // Mostrar Game Over
+                    this.showGameOver();
+
+                    // Después de 2 segundos, iniciar la caída
+                    this.time.delayedCall(2000, () => {
+                        player.body.allowGravity = true;
+                        player.body.setVelocityY(50);
+                        player.setTexture('hubito2');
+                    });
+                }
+            });
+
+            fallingObject.destroy();
         }
-
+    } else if (type === 'score') {
+        this.score += 10;
+        this.scoreText.setText('' + this.score);
+        this.pickupSound.play();
         fallingObject.destroy();
     }
+}
 
     handleShieldCollision(player, shield) {
         if (!this.hasShield) {
