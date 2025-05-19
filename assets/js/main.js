@@ -51,13 +51,16 @@ class MainScene extends Phaser.Scene {
         this.load.audio('star', 'assets/sounds/Cortinilla.wav');
         this.load.audio('hit', 'assets/sounds/hitHurt.wav');
         this.load.audio('pickup', 'assets/sounds/pickup.wav');
+        
+        this.load.audio('music', 'assets/sounds/soundtrack.mp3');
+        this.load.audio('end', 'assets/sounds/gameover.mp3');
     }
 
     create() {
         this.setupScene();
         this.setupControls();
         this.setupSounds();
-        this.setupScoreIndicators(); // Función para crear los indicadores de puntaje
+        this.setupScoreIndicators();
     }
 
     setupScene() {
@@ -81,15 +84,26 @@ class MainScene extends Phaser.Scene {
     }
 
     setupSounds() {
-        this.jumpSound = this.sound.add('jump', { volume: 0.35 });
-        this.hitSound = this.sound.add('hit');
-        this.pickupSound = this.sound.add('pickup');
-        this.starSound = this.sound.add('star', {
-            loop: false,
-            volume: 0.20, // Ajustar volumen
-        });
-        this.starSound.play(); // Se reproduce en el inicio
-    }
+    this.jumpSound = this.sound.add('jump', { volume: 0.35 });
+    this.hitSound = this.sound.add('hit');
+    this.pickupSound = this.sound.add('pickup');
+
+    this.starSound = this.sound.add('star', {
+        loop: false,
+        volume: 0.20,
+    });
+
+    this.musicSound = this.sound.add('music', {
+        loop: true,
+        volume: 0.80,
+    });
+
+    this.starSound.on('complete', () => {
+        this.musicSound.play();
+    });
+
+    this.starSound.play();
+}
 
     setupText() {
         const startTextContent = 'Presiona la tecla “Espacio” o da clic en la pantalla para comenzar.';
@@ -253,16 +267,21 @@ class MainScene extends Phaser.Scene {
         this.player.setTexture('hubitojump'); // Cambiar a imagen de salto inicial
     }
 
-    endGame() {
-        this.player.setData('isAlive', false);
-        this.physics.pause();
-        this.player.body.setVelocityY(0);
-        this.player.body.allowGravity = false;
-        this.add.text(this.scale.width / 2, this.scale.height / 2, '¡Game Over!', {
-            fontSize: '32px',
-            fill: '#fff'
-        }).setOrigin(0.5);
+   endGame() {
+    this.player.setData('isAlive', false);
+    this.physics.pause();
+    this.player.body.setVelocityY(0);
+    this.player.body.allowGravity = false;
+    this.add.text(this.scale.width / 2, this.scale.height / 2, '¡Game Over!', {
+        fontSize: '32px',
+        fill: '#fff'
+    }).setOrigin(0.5);
+
+    // Detener la música al finalizar el juego
+    if (this.musicSound && this.musicSound.isPlaying) {
+        this.musicSound.stop();
     }
+}
 
     isMobileDevice() {
         return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -719,24 +738,30 @@ class MainScene extends Phaser.Scene {
 
 
     update(time, delta) {
-        if (!this.gameStarted || !this.player.getData('isAlive') || this.isPaused) return;
+    if (!this.gameStarted || !this.player.getData('isAlive') || this.isPaused) return;
 
-        this.handlePlayerMovement();
-        this.handlePlatformCollisions();
-        this.handlePlatformGeneration();
-        this.handleFallingObjects(delta);
-        this.handleShieldSpawning(delta);
-        this.handleBootsSpawning(delta);
-        this.handleBootsEffect(delta);
-        this.bg.tilePositionY = this.cameras.main.scrollY;
-        this.platforms.children.iterate(platform => {
-            if (platform && platform.update) {
-                platform.update();
-            }
-        });
+    this.handlePlayerMovement();
+    this.handlePlatformCollisions();
+    this.handlePlatformGeneration();
+    this.handleFallingObjects(delta);
+    this.handleShieldSpawning(delta);
+    this.handleBootsSpawning(delta);
+    this.handleBootsEffect(delta);
+    this.bg.tilePositionY = this.cameras.main.scrollY;
+    this.platforms.children.iterate(platform => {
+        if (platform && platform.update) {
+            platform.update();
+        }
+    });
 
-        this.updateScoreIndicators(); // Nueva función para actualizar los indicadores de puntaje
+    this.updateScoreIndicators();
+
+    // --- Nueva lógica para detectar la caída del jugador ---
+    const cameraBottom = this.cameras.main.scrollY + this.scale.height;
+    if (this.player.y > cameraBottom + 100) { // Ajusta el valor '100' según necesites
+        this.endGame();
     }
+}
 
     updateScoreIndicators() {
         const colorBlue = 0x2A67FB;
