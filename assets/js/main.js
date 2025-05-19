@@ -36,6 +36,7 @@ class MainScene extends Phaser.Scene {
 
     preload() {
         this.load.image('sky', 'assets/sky.png');
+        this.load.image('endgame', 'assets/img/end.svg');
 
         // Cargamos archivos de hubito
         this.load.image('hubito', 'assets/img/hubito01.png');
@@ -51,7 +52,8 @@ class MainScene extends Phaser.Scene {
         this.load.audio('star', 'assets/sounds/Cortinilla.wav');
         this.load.audio('hit', 'assets/sounds/hitHurt.wav');
         this.load.audio('pickup', 'assets/sounds/pickup.wav');
-        
+
+        // Cargamos archivos de sonido de fondo
         this.load.audio('music', 'assets/sounds/soundtrack.mp3');
         this.load.audio('end', 'assets/sounds/gameover.mp3');
     }
@@ -61,6 +63,9 @@ class MainScene extends Phaser.Scene {
         this.setupControls();
         this.setupSounds();
         this.setupScoreIndicators();
+
+        // --- Crear la imagen de Game Over y hacerla invisible inicialmente ---
+        this.gameOverImage = this.add.image(this.scale.width / 2, this.scale.height / 2, 'endgame').setOrigin(0.5).setDepth(100).setScale(0.5).setVisible(false);
     }
 
     setupScene() {
@@ -84,26 +89,26 @@ class MainScene extends Phaser.Scene {
     }
 
     setupSounds() {
-    this.jumpSound = this.sound.add('jump', { volume: 0.35 });
-    this.hitSound = this.sound.add('hit');
-    this.pickupSound = this.sound.add('pickup');
+        this.jumpSound = this.sound.add('jump', { volume: 0.35 });
+        this.hitSound = this.sound.add('hit');
+        this.pickupSound = this.sound.add('pickup');
 
-    this.starSound = this.sound.add('star', {
-        loop: false,
-        volume: 0.20,
-    });
+        this.starSound = this.sound.add('star', {
+            loop: false,
+            volume: 0.20,
+        });
 
-    this.musicSound = this.sound.add('music', {
-        loop: true,
-        volume: 0.80,
-    });
+        this.musicSound = this.sound.add('music', {
+            loop: true,
+            volume: 0.80,
+        });
 
-    this.starSound.on('complete', () => {
-        this.musicSound.play();
-    });
+        this.starSound.on('complete', () => {
+            this.musicSound.play();
+        });
 
-    this.starSound.play();
-}
+        this.starSound.play();
+    }
 
     setupText() {
         const startTextContent = 'Presiona la tecla “Espacio” o da clic en la pantalla para comenzar.';
@@ -225,7 +230,6 @@ class MainScene extends Phaser.Scene {
         }
     }
 
-
     setupCollisions() {
         this.physics.add.overlap(this.player, this.fallingObjects, this.handleFallingObjectCollision, null, this);
         this.physics.add.overlap(this.player, this.shieldObjects, this.handleShieldCollision, null, this);
@@ -267,33 +271,32 @@ class MainScene extends Phaser.Scene {
         this.player.setTexture('hubitojump'); // Cambiar a imagen de salto inicial
     }
 
-   endGame() {
-    this.player.setData('isAlive', false);
-    this.physics.pause();
-    this.player.body.setVelocityY(0);
-    this.player.body.allowGravity = false;
-    this.add.text(this.scale.width / 2, this.scale.height / 2, '¡Game Over!', {
-        fontSize: '32px',
-        fill: '#fff'
-    }).setOrigin(0.5);
-
-    // Detener la música al finalizar el juego
-    if (this.musicSound && this.musicSound.isPlaying) {
-        this.musicSound.stop();
+    showGameOver() {
+        this.add.text(this.scale.width / 2, this.scale.height / 2, '¡Game Over!', {
+            fontSize: '32px',
+            fill: '#2A67FB',
+            fontFamily: '"Press Start 2P", monospace'
+        }).setOrigin(0.5).setDepth(100);
     }
-}
+
+    endGame() {
+        this.player.setData('isAlive', false);
+        this.physics.pause();
+        this.player.body.setVelocityY(0);
+        this.player.body.allowGravity = false;
+
+        // --- Llamamos a showGameOver() para mostrar el texto ---
+        this.showGameOver();
+
+        // Detener la música al finalizar el juego
+        if (this.musicSound && this.musicSound.isPlaying) {
+            this.musicSound.stop();
+        }
+    }
 
     isMobileDevice() {
         return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     }
-
-    showGameOver() {
-    this.add.text(this.scale.width / 2, this.scale.height / 2, '¡Game Over!', {
-        fontSize: '32px',
-        fill: '#fff',
-        fontFamily: '"Press Start 2P", monospace'
-    }).setOrigin(0.5).setDepth(100);
-}
 
     /* -----------------------
             Player
@@ -610,55 +613,55 @@ class MainScene extends Phaser.Scene {
     }
 
     handleFallingObjectCollision(player, fallingObject) {
-    if (!player.getData('isAlive')) return;
+        if (!player.getData('isAlive')) return;
 
-    const type = fallingObject.getData('type');
-    if (type === 'damage') {
-        this.hitSound.play();
-
-        if (this.hasShield) {
-            this.hasShield = false;
-            this.player.fillColor = this.playerColor;
-            this.shieldObject?.destroy();
-            this.shieldObject = null;
+        const type = fallingObject.getData('type');
+        if (type === 'damage') {
             this.hitSound.play();
-            fallingObject.destroy();
-        } else {
-            // --- Nueva lógica de muerte por ladrillo con Game Over y caída ---
-            this.player.setData('isAlive', false); // Marcar al jugador como no vivo
 
-            // Congelar al jugador
-            player.body.setVelocityX(0);
-            player.body.allowGravity = false;
+            if (this.hasShield) {
+                this.hasShield = false;
+                this.player.fillColor = this.playerColor;
+                this.shieldObject?.destroy();
+                this.shieldObject = null;
+                this.hitSound.play();
+                fallingObject.destroy();
+            } else {
+                // --- Nueva lógica de muerte por ladrillo con Game Over ---
+                this.player.setData('isAlive', false); // Marcar al jugador como no vivo
 
-            // Pequeño salto
-            this.tweens.add({
-                targets: player,
-                y: player.y - 30,
-                duration: 200,
-                ease: 'Sine.out',
-                onComplete: () => {
-                    // Mostrar Game Over
-                    this.showGameOver();
+                // Congelar al jugador
+                player.body.setVelocityX(0);
+                player.body.allowGravity = false;
 
-                    // Después de 2 segundos, iniciar la caída
-                    this.time.delayedCall(2000, () => {
-                        player.body.allowGravity = true;
-                        player.body.setVelocityY(50);
-                        player.setTexture('hubito2');
-                    });
-                }
-            });
+                // Pequeño salto
+                this.tweens.add({
+                    targets: player,
+                    y: player.y - 10,
+                    duration: 200,
+                    ease: 'Sine.out',
+                    onComplete: () => {
+                        // Mostrar Game Over
+                        this.showGameOver();
 
+                        // Después de 1 seg, iniciar la caída
+                        this.time.delayedCall(1000, () => {
+                            player.body.allowGravity = true;
+                            player.body.setVelocityY(50);
+                            player.setTexture('hubito2');
+                        });
+                    }
+                });
+
+                fallingObject.destroy();
+            }
+        } else if (type === 'score') {
+            this.score += 10;
+            this.scoreText.setText('' + this.score);
+            this.pickupSound.play();
             fallingObject.destroy();
         }
-    } else if (type === 'score') {
-        this.score += 10;
-        this.scoreText.setText('' + this.score);
-        this.pickupSound.play();
-        fallingObject.destroy();
     }
-}
 
     handleShieldCollision(player, shield) {
         if (!this.hasShield) {
@@ -736,32 +739,31 @@ class MainScene extends Phaser.Scene {
         }
     }
 
-
     update(time, delta) {
-    if (!this.gameStarted || !this.player.getData('isAlive') || this.isPaused) return;
+        if (!this.gameStarted || !this.player.getData('isAlive') || this.isPaused) return;
 
-    this.handlePlayerMovement();
-    this.handlePlatformCollisions();
-    this.handlePlatformGeneration();
-    this.handleFallingObjects(delta);
-    this.handleShieldSpawning(delta);
-    this.handleBootsSpawning(delta);
-    this.handleBootsEffect(delta);
-    this.bg.tilePositionY = this.cameras.main.scrollY;
-    this.platforms.children.iterate(platform => {
-        if (platform && platform.update) {
-            platform.update();
+        this.handlePlayerMovement();
+        this.handlePlatformCollisions();
+        this.handlePlatformGeneration();
+        this.handleFallingObjects(delta);
+        this.handleShieldSpawning(delta);
+        this.handleBootsSpawning(delta);
+        this.handleBootsEffect(delta);
+        this.bg.tilePositionY = this.cameras.main.scrollY;
+        this.platforms.children.iterate(platform => {
+            if (platform && platform.update) {
+                platform.update();
+            }
+        });
+
+        this.updateScoreIndicators();
+
+        // --- Nueva lógica para detectar la caída del jugador ---
+        const cameraBottom = this.cameras.main.scrollY + this.scale.height;
+        if (this.player.y > cameraBottom + 100) { // Ajusta el valor '100' según necesites
+            this.endGame();
         }
-    });
-
-    this.updateScoreIndicators();
-
-    // --- Nueva lógica para detectar la caída del jugador ---
-    const cameraBottom = this.cameras.main.scrollY + this.scale.height;
-    if (this.player.y > cameraBottom + 100) { // Ajusta el valor '100' según necesites
-        this.endGame();
     }
-}
 
     updateScoreIndicators() {
         const colorBlue = 0x2A67FB;
