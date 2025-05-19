@@ -26,7 +26,7 @@ class MainScene extends Phaser.Scene {
         this.specialObjectsGravity = 10;
         this.platformTypes = ['static', 'bomb'];
         this.platforms = null;
-        this.bombPlatformPercentage = 0.15;
+        this.bombPlatformPercentage = 0.10;
         // Agregamos variables para los sonidos
         this.jumpSound = null;
         this.cortinillaSound = null;
@@ -35,27 +35,31 @@ class MainScene extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image('sky', 'assets/sky.png');
-        this.load.image('endgame', 'assets/img/end.svg');
+        this.load.image('background', './assets/img/background.png');
+        this.load.image('endgame', './assets/img/end.svg');
+        this.load.image('platform01', './assets/img/viga.png');
 
         // Cargamos archivos de hubito
-        this.load.image('hubito', 'assets/img/hubito01.png');
-        this.load.image('hubito2', 'assets/img/hubito02.png');
-        this.load.image('hubitojump', 'assets/img/hubitojump.png');
-        this.load.image('hubitojump2', 'assets/img/hubitojump2.png');
+        this.load.image('hubito', './assets/img/hubito01.png');
+        this.load.image('hubito2', './assets/img/hubito02.png');
+        this.load.image('hubitojump', './assets/img/hubitojump.png');
+        this.load.image('hubitojump2', './assets/img/hubitojump2.png');
 
         // Cargamos archivos de objetos
-        this.load.image('brick', 'assets/img/brick.png');
+        this.load.image('brick', './assets/img/brick.png');
+        this.load.image('coin', './assets/img/award01.png');
+        this.load.image('cupon', './assets/img/award02.png');
+        this.load.image('book', './assets/img/award03.png');
 
         // Cargamos los archivos de sonido
-        this.load.audio('jump', 'assets/sounds/jump.wav');
-        this.load.audio('star', 'assets/sounds/Cortinilla.wav');
-        this.load.audio('hit', 'assets/sounds/hitHurt.wav');
-        this.load.audio('pickup', 'assets/sounds/pickup.wav');
+        this.load.audio('jump', './assets/sounds/jump.wav');
+        this.load.audio('star', './assets/sounds/Cortinilla.wav');
+        this.load.audio('hit', './assets/sounds/hitHurt.wav');
+        this.load.audio('pickup', './assets/sounds/pickup.wav');
 
         // Cargamos archivos de sonido de fondo
-        this.load.audio('music', 'assets/sounds/soundtrack.mp3');
-        this.load.audio('end', 'assets/sounds/gameover.mp3');
+        this.load.audio('music', './assets/sounds/soundtrack.mp3');
+        this.load.audio('end', './assets/sounds/gameover.mp3');
     }
 
     create() {
@@ -63,8 +67,6 @@ class MainScene extends Phaser.Scene {
         this.setupControls();
         this.setupSounds();
         this.setupScoreIndicators();
-
-        // --- Crear la imagen de Game Over y hacerla invisible inicialmente ---
         this.gameOverImage = this.add.image(this.scale.width / 2, this.scale.height / 2, 'endgame').setOrigin(0.5).setDepth(100).setScale(0.5).setVisible(false);
     }
 
@@ -83,9 +85,10 @@ class MainScene extends Phaser.Scene {
     }
 
     setupBackground() {
-        this.bg = this.add.tileSprite(0, 0, this.scale.width, this.scale.height * 2, 'sky')
-            .setOrigin(0, 1)
-            .setScrollFactor(0);
+        this.bg = this.add.image(0, 0, 'background')
+            .setOrigin(0)
+            .setDisplaySize(this.scale.width, this.scale.height)
+            .setScrollFactor(0); // Fondo fijo
     }
 
     setupSounds() {
@@ -100,7 +103,7 @@ class MainScene extends Phaser.Scene {
 
         this.musicSound = this.sound.add('music', {
             loop: true,
-            volume: 0.80,
+            volume: 0.50,
         });
 
         this.starSound.on('complete', () => {
@@ -125,7 +128,7 @@ class MainScene extends Phaser.Scene {
                 align: 'center',
                 wordWrap: { width: maxWidth, useAdvancedWrap: true }
             }
-        ).setOrigin(0.5).setDepth(1000); // Z-index alto para estar por encima de todos
+        ).setOrigin(0.5).setDepth(1000); // Z-index alto
 
         this.scoreLabel = this.add.text(10, 10, 'Puntos:', {
             fontSize: '13px',
@@ -154,16 +157,16 @@ class MainScene extends Phaser.Scene {
         const startX = this.scale.width - (3 * squareSize + 2 * padding) - 10; // Posición inicial en la derecha
         const startY = 10;
         const colorGray = 0x808080; // Código hexadecimal para gris
-        const colorBlue = 0x2A67FB; // Código hexadecimal para el azul
 
         this.scoreIndicators = [
             this.add.rectangle(startX, startY, squareSize, squareSize, colorGray).setOrigin(0, 0).setScrollFactor(0).setDepth(10), // Izquierda
             this.add.rectangle(startX + squareSize + padding, startY, squareSize, squareSize, colorGray).setOrigin(0, 0).setScrollFactor(0).setDepth(10), // Centro
-            this.add.rectangle(startX + 2 * (squareSize + padding), startY, squareSize, squareSize, colorGray).setOrigin(0, 0).setScrollFactor(0).setDepth(10)  // Derecha
+            this.add.rectangle(startX + 2 * (squareSize + padding), startY, squareSize, squareSize, colorGray).setOrigin(0, 0).setScrollFactor(0).setDepth(10)  // Derecha
         ];
 
-        this.scoreThresholds = [25, 50, 100]; // Puntajes para cambiar de color
-        this.indicatorColors = Array(3).fill(colorGray); // Estado inicial de los colores
+        this.scoreThresholds = [25, 50, 100]; // Puntajes para cambiar
+        this.indicatorKeys = ['book', 'cupon', 'coin']; // Claves de las imágenes
+        this.indicatorsChanged = [false, false, false]; // Registro de cambios
     }
 
     /* -----------------------
@@ -322,54 +325,11 @@ class MainScene extends Phaser.Scene {
         this.player.setData('isAlive', true);
         this.maxPlayerY = this.player.y;
 
-        // Opcional: guardar color original por si luego quieres usarlo
-        this.playerColor = 0x0000aa;
-
         // Velocidad de salto
         this.originalPlayerJumpSpeed = -550;
 
-        this.player.scale = 1.3;
+        this.player.scale = 1;
     }
-
-    /* Codigo a prueba para el movimiento del jugador
-    
-        handlePlayerMovement() {
-            const moveSpeed = 200;
-            const screenWidth = this.scale.width;
-    
-            let velocityX = 0;
-    
-            if (this.isMobileDevice()) {
-                // En móviles: usar botones o touch
-                if (this.leftPressed) {
-                    velocityX = -moveSpeed;
-                } else if (this.rightPressed) {
-                    velocityX = moveSpeed;
-                }
-            } else {
-                // En PC: usar teclas del teclado
-                if (this.cursors.left.isDown) {
-                    velocityX = -moveSpeed;
-                } else if (this.cursors.right.isDown) {
-                    velocityX = moveSpeed;
-                }
-            }
-    
-            this.player.body.setVelocityX(velocityX);
-    
-            // Envolvimiento horizontal
-            const halfWidth = this.player.width / 2;
-            if (this.player.x < -halfWidth) this.player.x = screenWidth + halfWidth;
-            else if (this.player.x > screenWidth + halfWidth) this.player.x = -halfWidth;
-    
-            // Cambiar imagen si no está saltando y hay movimiento horizontal
-            if (this.player.body.velocity.y === 0 && velocityX !== 0) {
-                this.player.setTexture('hubito2');
-            } else if (this.player.body.velocity.y === 0 && velocityX === 0) {
-                this.player.setTexture('hubito');
-            }
-        } 
-*/
 
     handlePlayerMovement() {
         const moveSpeed = 200;
@@ -450,18 +410,33 @@ class MainScene extends Phaser.Scene {
     }
 
     createPlatform(x, y, type = 'static') {
-        const platform = this.platforms.create(x, y, null)
-            .setOrigin(0.5)
-            .setDisplaySize(60, 20)
-            .refreshBody();
+        let platform;
+        if (type === 'static') {
+            // Crear un sprite con la imagen 'platform01'
+            platform = this.platforms.create(x, y, 'platform01')
+                .setOrigin(0.5)
+                .setDisplaySize(80, 16) // Establecer el tamaño
+                .refreshBody();
+            // Ya no necesitamos el rectángulo gráfico para las plataformas estáticas
+            if (platform.gfx) {
+                platform.gfx.destroy();
+            }
+            platform.gfx = null; // Asegurarse de que no haya referencia al gfx destruido
+        } else {
+            // Para otros tipos (como 'bomb'), seguimos creando el rectángulo gráfico
+            platform = this.platforms.create(x, y, null)
+                .setOrigin(0.5)
+                .setDisplaySize(80, 16) // También aplicamos el nuevo tamaño
+                .refreshBody();
 
-        const gfx = this.add.rectangle(x, y, 60, 20, this.getPlatformColor(type));
-        gfx.setDepth(1); // Opcional: controla que el jugador esté arriba
+            const gfx = this.add.rectangle(x, y, 80, 16, this.getPlatformColor(type));
+            gfx.setDepth(1);
 
-        platform.gfx = gfx;
-        platform.update = () => {
-            gfx.setPosition(platform.x, platform.y);
-        };
+            platform.gfx = gfx;
+            platform.update = () => {
+                gfx.setPosition(platform.x, platform.y);
+            };
+        }
 
         platform.type = type;
         platform.isOneWay = true;
@@ -472,7 +447,6 @@ class MainScene extends Phaser.Scene {
 
         return platform;
     }
-
 
     getPlatformColor(type) {
         switch (type) {
@@ -739,6 +713,37 @@ class MainScene extends Phaser.Scene {
         }
     }
 
+    updateScoreIndicators() {
+        const squareSize = 20;
+        const padding = 5;
+        const startX = this.scale.width - (3 * squareSize + 2 * padding) - 10;
+        const startY = 10;
+
+        const positions = [
+            { x: startX + squareSize / 2, y: startY + squareSize / 2 }, // Izquierda
+            { x: startX + squareSize + padding + squareSize / 2, y: startY + squareSize / 2 }, // Centro
+            { x: startX + 2 * (squareSize + padding) + squareSize / 2, y: startY + squareSize / 2 }  // Derecha
+        ];
+
+        for (let i = 0; i < this.scoreThresholds.length; i++) {
+            if (this.score >= this.scoreThresholds[i] && !this.indicatorsChanged[i]) {
+                // Destruir el rectángulo actual
+                this.scoreIndicators[i].destroy();
+
+                // Crear el nuevo sprite de la imagen
+                const newIndicator = this.add.sprite(positions[i].x, positions[i].y, this.indicatorKeys[i])
+                    .setOrigin(0.5, 0.5)
+                    .setScale(0.8)
+                    .setScrollFactor(0)
+                    .setDepth(10);
+
+                // Actualizar la referencia en el array
+                this.scoreIndicators[i] = newIndicator;
+                this.indicatorsChanged[i] = true;
+            }
+        }
+    }
+
     update(time, delta) {
         if (!this.gameStarted || !this.player.getData('isAlive') || this.isPaused) return;
 
@@ -764,22 +769,12 @@ class MainScene extends Phaser.Scene {
             this.endGame();
         }
     }
-
-    updateScoreIndicators() {
-        const colorBlue = 0x2A67FB;
-        for (let i = 0; i < this.scoreThresholds.length; i++) {
-            if (this.score >= this.scoreThresholds[i] && this.indicatorColors[i] !== colorBlue) {
-                this.scoreIndicators[i].fillColor = colorBlue;
-                this.indicatorColors[i] = colorBlue;
-            }
-        }
-    }
 }
 
 const config = {
     type: Phaser.AUTO,
     width: 360,
-    height: 640,
+    height: 480,
     backgroundColor: '#87CEEB',
     physics: {
         default: 'arcade',
