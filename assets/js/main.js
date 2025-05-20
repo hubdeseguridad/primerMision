@@ -9,10 +9,19 @@ class MainScene extends Phaser.Scene {
         this.rightPressed = false;
         this.gameStarted = false;
         this.score = 0;
+        this.isPaused = false;
+        this.originalPlayerJumpSpeed = -550;
+        // Variables para las plataformas
         this.lastTouchedPlatformY = Infinity;
+        this.platformTypes = ['static', 'bomb'];
+        this.platforms = null;
+        this.bombPlatformPercentage = 0.10;
+        // Variables para los objetos
+        this.shieldObject = null;
+        this.bootsObject = null;
         this.hasShield = false;
         this.hasBoots = false;
-        this.originalPlayerJumpSpeed = -550;
+        this.specialObjectsGravity = 10;
         this.timers = {
             damageObject: { elapsed: 0, interval: Phaser.Math.Between(8000, 12000) },
             scoreBonus: { elapsed: 0, interval: 10000 },
@@ -20,14 +29,7 @@ class MainScene extends Phaser.Scene {
             bootsObject: { elapsed: 0, interval: 15000 },
             bootsEffect: { elapsed: 0, duration: 5000 }
         };
-        this.shieldObject = null;
-        this.bootsObject = null;
-        this.isPaused = false;
-        this.specialObjectsGravity = 10;
-        this.platformTypes = ['static', 'bomb'];
-        this.platforms = null;
-        this.bombPlatformPercentage = 0.10;
-        // Agregamos variables para los sonidos
+        // Variables para los sonidos
         this.jumpSound = null;
         this.cortinillaSound = null;
         this.hitSound = null;
@@ -38,6 +40,7 @@ class MainScene extends Phaser.Scene {
         this.load.image('background', './assets/img/background.png');
         this.load.image('endgame', './assets/img/end.svg');
         this.load.image('platform01', './assets/img/viga.png');
+        this.load.image('platform02', './assets/img/viga02.png');
 
         // Cargamos archivos de hubito
         this.load.image('hubito', './assets/img/hubito01.png');
@@ -47,6 +50,10 @@ class MainScene extends Phaser.Scene {
 
         // Cargamos archivos de objetos
         this.load.image('brick', './assets/img/brick.png');
+        this.load.image('boots', './assets/img/botita.png');
+        this.load.image('helmet', './assets/img/casco.png');
+        this.load.image('dc3', './assets/img/DC3.png');
+
         this.load.image('coin', './assets/img/award01.png');
         this.load.image('cupon', './assets/img/award02.png');
         this.load.image('book', './assets/img/award03.png');
@@ -128,7 +135,7 @@ class MainScene extends Phaser.Scene {
                 align: 'center',
                 wordWrap: { width: maxWidth, useAdvancedWrap: true }
             }
-        ).setOrigin(0.5).setDepth(1000); // Z-index alto
+        ).setOrigin(0.5).setDepth(1000);
 
         this.scoreLabel = this.add.text(10, 10, 'Puntos:', {
             fontSize: '13px',
@@ -156,7 +163,7 @@ class MainScene extends Phaser.Scene {
         const padding = 5;
         const startX = this.scale.width - (3 * squareSize + 2 * padding) - 10; // Posición inicial en la derecha
         const startY = 10;
-        const colorGray = 0x808080; // Código hexadecimal para gris
+        const colorGray = 0x808080;
 
         this.scoreIndicators = [
             this.add.rectangle(startX, startY, squareSize, squareSize, colorGray).setOrigin(0, 0).setScrollFactor(0).setDepth(10), // Izquierda
@@ -164,9 +171,9 @@ class MainScene extends Phaser.Scene {
             this.add.rectangle(startX + 2 * (squareSize + padding), startY, squareSize, squareSize, colorGray).setOrigin(0, 0).setScrollFactor(0).setDepth(10)  // Derecha
         ];
 
-        this.scoreThresholds = [25, 50, 100]; // Puntajes para cambiar
-        this.indicatorKeys = ['book', 'cupon', 'coin']; // Claves de las imágenes
-        this.indicatorsChanged = [false, false, false]; // Registro de cambios
+        this.scoreThresholds = [25, 50, 100];
+        this.indicatorKeys = ['book', 'cupon', 'coin'];
+        this.indicatorsChanged = [false, false, false];
     }
 
     /* -----------------------
@@ -268,10 +275,10 @@ class MainScene extends Phaser.Scene {
             this.cortinillaSound.stop();
         }
 
-        this.startText.destroy();           // Eliminar texto de inicio
-        this.player.body.allowGravity = true;  // Activar gravedad
-        this.player.body.setVelocityY(-550);   // Primer salto
-        this.player.setTexture('hubitojump'); // Cambiar a imagen de salto inicial
+        this.startText.destroy();
+        this.player.body.allowGravity = true;
+        this.player.body.setVelocityY(-550);
+        this.player.setTexture('hubitojump');
     }
 
     showGameOver() {
@@ -287,11 +294,8 @@ class MainScene extends Phaser.Scene {
         this.physics.pause();
         this.player.body.setVelocityY(0);
         this.player.body.allowGravity = false;
-
-        // --- Llamamos a showGameOver() para mostrar el texto ---
         this.showGameOver();
 
-        // Detener la música al finalizar el juego
         if (this.musicSound && this.musicSound.isPlaying) {
             this.musicSound.stop();
         }
@@ -308,8 +312,6 @@ class MainScene extends Phaser.Scene {
 
     setupPlayer() {
         const bottomPlatform = this.platforms.getChildren()[0];
-
-        // Crear el sprite del jugador usando la imagen cargada
         this.player = this.physics.add.sprite(
             bottomPlatform.x,
             bottomPlatform.y - 40,
@@ -356,9 +358,7 @@ class MainScene extends Phaser.Scene {
 
         const isFallingToDeath = this.player.y > deathThreshold && this.player.body.velocity.y > 0;
 
-        // Control de la imagen basado en la velocidad horizontal y vertical
         if (this.player.body.velocity.y < 0) {
-            // Saltando
             if (this.player.body.velocity.x > 0) {
                 this.player.setTexture('hubitojump2'); // Usar hubitojump2 al saltar a la derecha
             } else {
@@ -385,7 +385,6 @@ class MainScene extends Phaser.Scene {
             }
         }
 
-        // Envolvimiento horizontal (se mantiene igual)
         const halfWidth = this.player.width / 2;
         if (this.player.x < -halfWidth) this.player.x = screenWidth + halfWidth;
         else if (this.player.x > screenWidth + halfWidth) this.player.x = -halfWidth;
@@ -411,25 +410,34 @@ class MainScene extends Phaser.Scene {
 
     createPlatform(x, y, type = 'static') {
         let platform;
+        const width = 80; // Ancho de la plataforma
+        const height = 16; // Alto de la plataforma
+
         if (type === 'static') {
-            // Crear un sprite con la imagen 'platform01'
             platform = this.platforms.create(x, y, 'platform01')
                 .setOrigin(0.5)
-                .setDisplaySize(80, 16) // Establecer el tamaño
+                .setDisplaySize(width, height)
                 .refreshBody();
-            // Ya no necesitamos el rectángulo gráfico para las plataformas estáticas
             if (platform.gfx) {
                 platform.gfx.destroy();
             }
-            platform.gfx = null; // Asegurarse de que no haya referencia al gfx destruido
+            platform.gfx = null;
+        } else if (type === 'bomb') {
+            platform = this.platforms.create(x, y, 'platform02')
+                .setOrigin(0.5)
+                .setDisplaySize(width, height)
+                .refreshBody();
+            if (platform.gfx) {
+                platform.gfx.destroy();
+            }
+            platform.gfx = null;
         } else {
-            // Para otros tipos (como 'bomb'), seguimos creando el rectángulo gráfico
             platform = this.platforms.create(x, y, null)
                 .setOrigin(0.5)
-                .setDisplaySize(80, 16) // También aplicamos el nuevo tamaño
+                .setDisplaySize(width, height)
                 .refreshBody();
 
-            const gfx = this.add.rectangle(x, y, 80, 16, this.getPlatformColor(type));
+            const gfx = this.add.rectangle(x, y, width, height, this.getPlatformColor(type));
             gfx.setDepth(1);
 
             platform.gfx = gfx;
@@ -469,8 +477,8 @@ class MainScene extends Phaser.Scene {
         this.physics.overlap(this.player, this.platforms, (player, platform) => {
             if (platform.isOneWay && player.body.velocity.y > 0 && Math.abs(player.body.bottom - platform.body.top) < 10) {
                 player.body.setVelocityY(-550);
-                player.setTexture('hubitojump'); // Cambiar a imagen de salto
-                this.jumpSound.play(); // Reproducir el sonido de salto aquí
+                player.setTexture('hubitojump');
+                this.jumpSound.play();
                 if (platform.y < this.lastTouchedPlatformY) {
                     this.lastTouchedPlatformY = platform.y;
                     this.scoreText.setText('' + (++this.score));
@@ -528,10 +536,10 @@ class MainScene extends Phaser.Scene {
         this.physics.add.existing(object);
         object.body.setCircle(10);
 
-        const fallTime = 50000; // Tiempo de caída para hacerlos más lentos
+        const fallTime = 50000;
         const distance = this.scale.height * 1.5;
         const initialVelocity = (distance - 0.5 * 1000 * (fallTime * fallTime) / 1000000) / (fallTime / 1000);
-        const slowMotionFactor = 0.2; // Factor de cámara lenta
+        const slowMotionFactor = 0.2;
         object.body.setVelocityY(initialVelocity * slowMotionFactor);
         object.setData('type', type);
         this.fallingObjects.add(object);
@@ -554,18 +562,28 @@ class MainScene extends Phaser.Scene {
     }
 
     spawnScoreBonusObject() {
-        const score = this.spawnFallingObject('score', 0x0000ff, [0, 0]);
-        if (score) {
-            score.body.gravity.y = this.specialObjectsGravity;
-        }
+        if (!this.gameStarted || !this.player.getData('isAlive')) return;
+        const x = Phaser.Math.Between(30, this.scale.width - 30);
+        const y = this.cameras.main.scrollY - this.scale.height * 1.5;
+        // Cambiado a un sprite con 'dc3'
+        const scoreBonus = this.physics.add.sprite(x, y, 'dc3');
+        scoreBonus.setScale(0.5);
+        scoreBonus.body.setCircle((scoreBonus.width * 0.8) / 2);
+        scoreBonus.body.gravity.y = this.specialObjectsGravity;
+        scoreBonus.setData('type', 'score');
+        this.fallingObjects.add(scoreBonus);
+        scoreBonus.alias = 'DC3';
+        return scoreBonus;
     }
 
     spawnShieldObject() {
         if (!this.gameStarted || !this.player.getData('isAlive') || this.hasShield) return;
         const x = Phaser.Math.Between(30, this.scale.width - 30);
         const y = this.cameras.main.scrollY - this.scale.height * 1.5;
-        const shield = this.add.rectangle(x, y, 20, 20, 0xffff00);
-        this.physics.add.existing(shield);
+        // Cambiado a un sprite con 'helmet'
+        const shield = this.physics.add.sprite(x, y, 'helmet');
+        shield.setScale(0.5);
+        shield.body.setSize(shield.width, shield.height);
         shield.body.setImmovable(true);
         shield.body.gravity.y = this.specialObjectsGravity;
         this.shieldObjects.add(shield);
@@ -577,8 +595,10 @@ class MainScene extends Phaser.Scene {
         if (!this.gameStarted || !this.player.getData('isAlive') || this.hasBoots) return;
         const x = Phaser.Math.Between(30, this.scale.width - 30);
         const y = this.cameras.main.scrollY - this.scale.height * 1.5;
-        const boots = this.add.rectangle(x, y, 20, 20, 0x00ff00);
-        this.physics.add.existing(boots);
+        // Cambiado a un sprite con 'boots'
+        const boots = this.physics.add.sprite(x, y, 'boots');
+        boots.setScale(0.5);
+        boots.body.setSize(boots.width, boots.height);
         boots.body.setImmovable(true);
         boots.body.gravity.y = this.specialObjectsGravity;
         this.bootsObjects.add(boots);
@@ -601,8 +621,7 @@ class MainScene extends Phaser.Scene {
                 this.hitSound.play();
                 fallingObject.destroy();
             } else {
-                // --- Nueva lógica de muerte por ladrillo con Game Over ---
-                this.player.setData('isAlive', false); // Marcar al jugador como no vivo
+                this.player.setData('isAlive', false);
 
                 // Congelar al jugador
                 player.body.setVelocityX(0);
@@ -615,7 +634,6 @@ class MainScene extends Phaser.Scene {
                     duration: 200,
                     ease: 'Sine.out',
                     onComplete: () => {
-                        // Mostrar Game Over
                         this.showGameOver();
 
                         // Después de 1 seg, iniciar la caída
@@ -763,7 +781,6 @@ class MainScene extends Phaser.Scene {
 
         this.updateScoreIndicators();
 
-        // --- Nueva lógica para detectar la caída del jugador ---
         const cameraBottom = this.cameras.main.scrollY + this.scale.height;
         if (this.player.y > cameraBottom + 100) { // Ajusta el valor '100' según necesites
             this.endGame();
