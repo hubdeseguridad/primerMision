@@ -34,9 +34,6 @@ class MainScene extends Phaser.Scene {
         this.cortinillaSound = null;
         this.hitSound = null;
         this.pickupSound = null;
-        // Variables para el popup de pausa
-        this.pauseMenu = null;
-        this.pauseScoreText = null;
     }
 
     preload() {
@@ -78,7 +75,6 @@ class MainScene extends Phaser.Scene {
         this.setupSounds();
         this.setupScoreIndicators();
         this.gameOverImage = this.add.image(this.scale.width / 2, this.scale.height / 2, 'endgame').setOrigin(0.5).setDepth(100).setScale(0.5).setVisible(false);
-        this.createPauseMenu();
     }
 
     setupScene() {
@@ -92,13 +88,14 @@ class MainScene extends Phaser.Scene {
         this.setupCamera();
         this.setupCollisions();
         this.setupPauseButton();
+        this.setupSounds();
     }
 
     setupBackground() {
         this.bg = this.add.image(0, 0, 'background')
             .setOrigin(0)
             .setDisplaySize(this.scale.width, this.scale.height)
-            .setScrollFactor(0);
+            .setScrollFactor(0); // Fondo fijo
     }
 
     setupSounds() {
@@ -164,14 +161,14 @@ class MainScene extends Phaser.Scene {
     setupScoreIndicators() {
         const squareSize = 20;
         const padding = 5;
-        const startX = this.scale.width - (3 * squareSize + 2 * padding) - 10;
+        const startX = this.scale.width - (3 * squareSize + 2 * padding) - 10; // Posición inicial en la derecha
         const startY = 10;
         const colorGray = 0x808080;
 
         this.scoreIndicators = [
-            this.add.rectangle(startX, startY, squareSize, squareSize, colorGray).setOrigin(0, 0).setScrollFactor(0).setDepth(10),
-            this.add.rectangle(startX + squareSize + padding, startY, squareSize, squareSize, colorGray).setOrigin(0, 0).setScrollFactor(0).setDepth(10),
-            this.add.rectangle(startX + 2 * (squareSize + padding), startY, squareSize, squareSize, colorGray).setOrigin(0, 0).setScrollFactor(0).setDepth(10)
+            this.add.rectangle(startX, startY, squareSize, squareSize, colorGray).setOrigin(0, 0).setScrollFactor(0).setDepth(10), // Izquierda
+            this.add.rectangle(startX + squareSize + padding, startY, squareSize, squareSize, colorGray).setOrigin(0, 0).setScrollFactor(0).setDepth(10), // Centro
+            this.add.rectangle(startX + 2 * (squareSize + padding), startY, squareSize, squareSize, colorGray).setOrigin(0, 0).setScrollFactor(0).setDepth(10)  // Derecha
         ];
 
         this.scoreThresholds = [25, 50, 100];
@@ -181,7 +178,7 @@ class MainScene extends Phaser.Scene {
 
     /* -----------------------
             Game State
-    -----------------------
+        -----------------------
     */
     setupCamera() {
         this.cameras.main.startFollow(this.player, true, 0.05, 0.05);
@@ -190,34 +187,15 @@ class MainScene extends Phaser.Scene {
 
     setupControls() {
         this.cursors = this.input.keyboard.createCursorKeys();
-        this.input.keyboard.on('keydown-SPACE', () => {
-            if (!this.gameStarted && !this.isPaused) {
-                this.startGame();
-            }
-        });
-        this.input.on('pointerdown', (pointer) => {
-            if (!this.gameStarted && !this.isPaused) {
-                this.startGame();
-            }
-            if (this.isPaused && !this.pauseMenu.getBounds().contains(pointer.x, pointer.y)) {
-                return;
-            }
-        });
-
+        this.input.keyboard.on('keydown-SPACE', () => this.startGame());
+        this.input.on('pointerdown', () => this.startGame());
         this.setupTouchControls();
-
-        this.input.keyboard.on('keydown-P', () => {
-            if (this.gameStarted && this.player.getData('isAlive')) {
-                this.togglePause();
-            }
-        });
+        this.input.keyboard.on('keydown-P', () => this.togglePause());
     }
 
     setupTouchControls() {
         if (this.isMobileDevice()) {
             this.input.on('pointerdown', (pointer) => {
-                if (!this.gameStarted || this.isPaused) return;
-
                 const mid = this.scale.width / 2;
                 if (pointer.x < mid) {
                     this.leftPressed = true;
@@ -229,8 +207,6 @@ class MainScene extends Phaser.Scene {
             });
 
             this.input.on('pointermove', (pointer) => {
-                if (!this.gameStarted || this.isPaused) return;
-
                 const mid = this.scale.width / 2;
                 if (pointer.isDown) {
                     if (pointer.x < mid) {
@@ -244,27 +220,15 @@ class MainScene extends Phaser.Scene {
             });
 
             this.input.on('pointerup', () => {
-                if (!this.gameStarted || this.isPaused) return;
-
                 this.leftPressed = false;
                 this.rightPressed = false;
             });
         } else {
+            // Soporte para controles de escritorio
             const setButtonState = (btn, state) => {
-                const handleEvent = (event) => {
-                    if (this.isPaused) return;
-                    this[state] = event.type === 'pointerdown';
-                };
-
-                btn?.removeEventListener('pointerdown', handleEvent);
-                btn?.removeEventListener('pointerup', handleEvent);
-                btn?.removeEventListener('pointerout', handleEvent);
-                btn?.removeEventListener('pointercancel', handleEvent);
-
-                btn?.addEventListener('pointerdown', handleEvent);
-                btn?.addEventListener('pointerup', handleEvent);
-                btn?.addEventListener('pointerout', handleEvent);
-                btn?.addEventListener('pointercancel', handleEvent);
+                ['pointerdown', 'pointerup', 'pointerout', 'pointercancel'].forEach(event =>
+                    btn?.addEventListener(event, () => this[state] = event === 'pointerdown')
+                );
             };
 
             const leftBtn = document.getElementById('left-btn');
@@ -284,101 +248,31 @@ class MainScene extends Phaser.Scene {
 
     setupPauseButton() {
         this.pauseBtn = document.getElementById('pause-btn');
-        if (this.pauseBtn) {
-            this.pauseBtn.removeEventListener('click', this.togglePause.bind(this));
-            this.pauseBtn.addEventListener('click', () => {
-                if (this.gameStarted && this.player.getData('isAlive')) {
-                    this.togglePause();
-                }
-            });
-        }
-    }
-
-    createPauseMenu() {
-        const { width, height } = this.scale;
-        const centerX = width / 2;
-        const centerY = height / 2;
-
-        const backgroundRect = this.add.rectangle(centerX, centerY, width * 0.7, height * 0.4, 0xffffff, 0.7)
-            .setOrigin(0.5)
-            .setDepth(2000);
-
-        this.pauseScoreText = this.add.text(centerX, centerY - 40, 'Puntos: ' + this.score, {
-            fontSize: '18px',
-            fontFamily: '"Press Start 2P", monospace',
-            fill: '#000',
-            align: 'center'
-        }).setOrigin(0.5).setDepth(2001);
-
-        const messageText = this.add.text(centerX, centerY + 20, '¡No pares de avanzar! Un poco más y obtendrás la mejor recompensa', { 
-            fontSize: '12px',
-            fontFamily: '"Press Start 2P", monospace',
-            fill: '#2A67FB',
-            align: 'center',
-            wordWrap: { width: width * 0.6 } 
-        }).setOrigin(0.5).setDepth(2001);
-
-        // Botón "REANUDAR JUEGO"
-        // const resumeGameText = this.add.text(centerX, centerY + 40, 'REANUDAR JUEGO', {
-        //     fontSize: '12px',
-        //     fontFamily: '"Press Start 2P", monospace',
-        //     fill: '#F8FAFE',
-        //     backgroundColor: '#0E4DF1',
-        //     borderRadius: 12,
-        //     padding: { x: 15, y: 10 }
-        // })
-        //     .setOrigin(0.5)
-        //     .setDepth(2001)
-        //     .setInteractive({ useHandCursor: true });
-
-        // resumeGameText.on('pointerdown', () => {
-        //     this.togglePause();
-        // });
-
-        this.pauseMenu = this.add.container(0, 0, [backgroundRect, this.pauseScoreText, messageText ]);
-        this.pauseMenu.setScrollFactor(0);
-        this.pauseMenu.setVisible(false);
+        this.pauseBtn.addEventListener('click', () => this.togglePause());
+        this.pauseText = this.add.text(this.scale.width / 2, this.scale.height / 2 - 50, 'Pausado', {
+            fontSize: '32px',
+            fill: '#fff'
+        }).setOrigin(0.5).setDepth(100).setVisible(false);
     }
 
     togglePause() {
-        if (!this.gameStarted || !this.player.getData('isAlive')) {
-            return;
-        }
-
         this.isPaused = !this.isPaused;
-
-        if (this.isPaused) {
-            this.physics.pause();
-            this.musicSound.pause();
-            this.pauseMenu.setVisible(true);
-            this.pauseScoreText.setText('Puntos: ' + this.score);
-            this.player.body.setVelocity(0, 0);
-            this.fallingObjects.getChildren().forEach(obj => obj.body.enable = false);
-            this.shieldObjects.getChildren().forEach(obj => obj.body.enable = false);
-            this.bootsObjects.getChildren().forEach(obj => obj.body.enable = false);
-            this.input.enabled = false;
-            this.pauseMenu.setInteractive(new Phaser.Geom.Rectangle(0, 0, this.scale.width, this.scale.height), Phaser.Geom.Rectangle.Contains);
-
-
-        } else {
+        this.physics.pause();
+        // Agregar sonido para pausar
+        this.pauseText.setVisible(this.isPaused);
+        if (!this.isPaused) {
             this.physics.resume();
-            this.musicSound.resume();
-            this.pauseMenu.setVisible(false);
-            this.fallingObjects.getChildren().forEach(obj => obj.body.enable = true);
-            this.shieldObjects.getChildren().forEach(obj => obj.body.enable = true);
-            this.bootsObjects.getChildren().forEach(obj => obj.body.enable = true);
-            this.input.enabled = true;
-            this.pauseMenu.disableInteractive();
         }
     }
 
     startGame() {
-        if (this.gameStarted || this.isPaused) return;
+        if (this.gameStarted) return;
 
         this.gameStarted = true;
 
-        if (this.starSound && this.starSound.isPlaying) {
-            this.starSound.stop();
+        // Detener la cortinilla si está sonando
+        if (this.cortinillaSound && this.cortinillaSound.isPlaying) {
+            this.cortinillaSound.stop();
         }
 
         this.startText.destroy();
@@ -388,12 +282,14 @@ class MainScene extends Phaser.Scene {
     }
 
     showGameOver() {
-        this.gameOverImage.setVisible(true);
+        this.add.text(this.scale.width / 2, this.scale.height / 2, '¡Game Over!', {
+            fontSize: '32px',
+            fill: '#2A67FB',
+            fontFamily: '"Press Start 2P", monospace'
+        }).setOrigin(0.5).setDepth(100);
     }
 
     endGame() {
-        if (!this.player.getData('isAlive')) return;
-
         this.player.setData('isAlive', false);
         this.physics.pause();
         this.player.body.setVelocityY(0);
@@ -403,7 +299,6 @@ class MainScene extends Phaser.Scene {
         if (this.musicSound && this.musicSound.isPlaying) {
             this.musicSound.stop();
         }
-        this.sound.play('end');
     }
 
     isMobileDevice() {
@@ -412,7 +307,7 @@ class MainScene extends Phaser.Scene {
 
     /* -----------------------
             Player
-    -----------------------
+        -----------------------
     */
 
     setupPlayer() {
@@ -423,24 +318,22 @@ class MainScene extends Phaser.Scene {
             'hubito'
         );
 
+        // Configuraciones físicas
         this.player.setCollideWorldBounds(false);
         this.player.setBounce(0);
         this.player.body.allowGravity = false;
 
+        // Datos personalizados
         this.player.setData('isAlive', true);
         this.maxPlayerY = this.player.y;
 
+        // Velocidad de salto
         this.originalPlayerJumpSpeed = -550;
 
         this.player.scale = 1;
     }
 
     handlePlayerMovement() {
-        if (this.isPaused) {
-            this.player.body.setVelocityX(0);
-            return;
-        }
-
         const moveSpeed = 200;
         const screenWidth = this.scale.width;
         const deathThreshold = this.cameras.main.scrollY + this.scale.height * 0.8;
@@ -467,17 +360,19 @@ class MainScene extends Phaser.Scene {
 
         if (this.player.body.velocity.y < 0) {
             if (this.player.body.velocity.x > 0) {
-                this.player.setTexture('hubitojump2');
+                this.player.setTexture('hubitojump2'); // Usar hubitojump2 al saltar a la derecha
             } else {
-                this.player.setTexture('hubitojump');
+                this.player.setTexture('hubitojump'); // Usar hubitojump al saltar a la izquierda o vertical
             }
         } else if (this.player.body.velocity.y > 0) {
+            // Cayendo
             if (isFallingToDeath) {
                 this.player.setTexture('hubito2');
             } else {
                 this.player.setTexture('hubito');
             }
         } else {
+            // En el suelo
             if (velocityX < 0) {
                 this.player.setTexture('hubito2');
                 this.player.setScale(1.3, 1.3);
@@ -497,7 +392,7 @@ class MainScene extends Phaser.Scene {
 
     /* -----------------------
             Platforms
-    -----------------------
+        -----------------------
     */
 
     setupPlatforms() {
@@ -506,8 +401,8 @@ class MainScene extends Phaser.Scene {
         this.maxPlatforms = 15;
 
         for (let i = 0; i < 10; i++) {
-            const type = (i === 0) ? 'static' : (Math.random() < this.bombPlatformPercentage ? 'bomb' : 'static');
-            this.createPlatform(Phaser.Math.Between(30, this.scale.width - 30), 600 - i * this.platformSpacing, type);
+            const type = Math.random() < this.bombPlatformPercentage ? 'bomb' : 'static';
+            this.createPlatform(Phaser.Math.Between(30, this.scale.width - 30), 600 - i * this.platformSpacing, 'static');
         }
 
         this.lastGeneratedPlatformY = this.getHighestPlatformY();
@@ -515,8 +410,8 @@ class MainScene extends Phaser.Scene {
 
     createPlatform(x, y, type = 'static') {
         let platform;
-        const width = 80;
-        const height = 16;
+        const width = 80; // Ancho de la plataforma
+        const height = 16; // Alto de la plataforma
 
         if (type === 'static') {
             platform = this.platforms.create(x, y, 'platform01')
@@ -579,9 +474,6 @@ class MainScene extends Phaser.Scene {
     }
 
     handlePlatformCollisions() {
-        // La colisión solo ocurre si el juego NO está pausado
-        if (this.isPaused) return;
-
         this.physics.overlap(this.player, this.platforms, (player, platform) => {
             if (platform.isOneWay && player.body.velocity.y > 0 && Math.abs(player.body.bottom - platform.body.top) < 10) {
                 player.body.setVelocityY(-550);
@@ -606,9 +498,6 @@ class MainScene extends Phaser.Scene {
     }
 
     handlePlatformGeneration() {
-        // La generación de plataformas solo ocurre si el juego NO está pausado
-        if (this.isPaused) return;
-
         const bufferHeight = 3 * this.platformSpacing;
         while (this.lastGeneratedPlatformY > this.player.y - bufferHeight) {
             this.spawnPlatform(this.lastGeneratedPlatformY -= this.platformSpacing);
@@ -623,9 +512,9 @@ class MainScene extends Phaser.Scene {
         });
     }
 
-    /* -----------------------
-            Objects
-    -----------------------
+    /*  -----------------------
+            Objects   
+        -----------------------
     */
     setupFallingObjects() {
         this.fallingObjects = this.physics.add.group();
@@ -640,7 +529,7 @@ class MainScene extends Phaser.Scene {
     }
 
     spawnFallingObject(type, color, velocityRange) {
-        if (!this.gameStarted || !this.player.getData('isAlive') || this.isPaused) return; 
+        if (!this.gameStarted || !this.player.getData('isAlive')) return;
         const x = Phaser.Math.Between(30, this.scale.width - 30);
         const y = this.cameras.main.scrollY - this.scale.height * 1.5;
         const object = this.add.rectangle(x, y, 20, 20, color);
@@ -659,7 +548,6 @@ class MainScene extends Phaser.Scene {
     }
 
     spawnFallingDamageObject() {
-        if (!this.gameStarted || !this.player.getData('isAlive') || this.isPaused) return;
         const x = Phaser.Math.Between(30, this.scale.width - 30);
         const y = this.cameras.main.scrollY - this.scale.height * 1.5;
         const brick = this.physics.add.sprite(x, y, 'brick');
@@ -674,9 +562,10 @@ class MainScene extends Phaser.Scene {
     }
 
     spawnScoreBonusObject() {
-        if (!this.gameStarted || !this.player.getData('isAlive') || this.isPaused) return;
+        if (!this.gameStarted || !this.player.getData('isAlive')) return;
         const x = Phaser.Math.Between(30, this.scale.width - 30);
         const y = this.cameras.main.scrollY - this.scale.height * 1.5;
+        // Cambiado a un sprite con 'dc3'
         const scoreBonus = this.physics.add.sprite(x, y, 'dc3');
         scoreBonus.setScale(0.5);
         scoreBonus.body.setCircle((scoreBonus.width * 0.8) / 2);
@@ -688,9 +577,10 @@ class MainScene extends Phaser.Scene {
     }
 
     spawnShieldObject() {
-        if (!this.gameStarted || !this.player.getData('isAlive') || this.hasShield || this.isPaused) return;
+        if (!this.gameStarted || !this.player.getData('isAlive') || this.hasShield) return;
         const x = Phaser.Math.Between(30, this.scale.width - 30);
         const y = this.cameras.main.scrollY - this.scale.height * 1.5;
+        // Cambiado a un sprite con 'helmet'
         const shield = this.physics.add.sprite(x, y, 'helmet');
         shield.setScale(0.5);
         shield.body.setSize(shield.width, shield.height);
@@ -702,9 +592,10 @@ class MainScene extends Phaser.Scene {
     }
 
     spawnBootsObject() {
-        if (!this.gameStarted || !this.player.getData('isAlive') || this.hasBoots || this.isPaused) return; 
+        if (!this.gameStarted || !this.player.getData('isAlive') || this.hasBoots) return;
         const x = Phaser.Math.Between(30, this.scale.width - 30);
         const y = this.cameras.main.scrollY - this.scale.height * 1.5;
+        // Cambiado a un sprite con 'boots'
         const boots = this.physics.add.sprite(x, y, 'boots');
         boots.setScale(0.5);
         boots.body.setSize(boots.width, boots.height);
@@ -716,7 +607,7 @@ class MainScene extends Phaser.Scene {
     }
 
     handleFallingObjectCollision(player, fallingObject) {
-        if (!player.getData('isAlive') || this.isPaused) return;
+        if (!player.getData('isAlive')) return;
 
         const type = fallingObject.getData('type');
         if (type === 'damage') {
@@ -724,6 +615,7 @@ class MainScene extends Phaser.Scene {
 
             if (this.hasShield) {
                 this.hasShield = false;
+                this.player.fillColor = this.playerColor;
                 this.shieldObject?.destroy();
                 this.shieldObject = null;
                 this.hitSound.play();
@@ -731,9 +623,11 @@ class MainScene extends Phaser.Scene {
             } else {
                 this.player.setData('isAlive', false);
 
+                // Congelar al jugador
                 player.body.setVelocityX(0);
                 player.body.allowGravity = false;
 
+                // Pequeño salto
                 this.tweens.add({
                     targets: player,
                     y: player.y - 10,
@@ -742,6 +636,7 @@ class MainScene extends Phaser.Scene {
                     onComplete: () => {
                         this.showGameOver();
 
+                        // Después de 1 seg, iniciar la caída
                         this.time.delayedCall(1000, () => {
                             player.body.allowGravity = true;
                             player.body.setVelocityY(50);
@@ -761,8 +656,9 @@ class MainScene extends Phaser.Scene {
     }
 
     handleShieldCollision(player, shield) {
-        if (!this.hasShield && !this.isPaused) { 
+        if (!this.hasShield) {
             this.hasShield = true;
+            this.player.fillColor = 0xffff00;
             shield.destroy();
             this.shieldObject = null;
             this.pickupSound.play();
@@ -770,22 +666,21 @@ class MainScene extends Phaser.Scene {
     }
 
     handleBootsCollision(player, boots) {
-        if (!this.hasBoots && !this.isPaused) { 
+        if (!this.hasBoots) {
             this.hasBoots = true;
-            this.player.body.setVelocityY(-1200);
+            this.originalPlayerJumpSpeed = this.player.body.velocity.y;
+            this.player.body.setVelocityY(-1000);
             this.timers.bootsEffect.elapsed = 0;
             this.timers.bootsEffect.duration = 5000;
             this.bootsObject.destroy();
             this.bootsObject = null;
-            this.score += 4;
+            this.score += 3;
             this.scoreText.setText('' + this.score);
             this.pickupSound.play();
         }
     }
 
     handleFallingObjects(delta) {
-        if (this.isPaused) return;
-
         this.timers.damageObject.elapsed += delta;
         this.timers.scoreBonus.elapsed += delta;
 
@@ -810,7 +705,6 @@ class MainScene extends Phaser.Scene {
     }
 
     handleShieldSpawning(delta) {
-        if (this.isPaused) return;
         this.timers.shieldObject.elapsed += delta;
         if (this.timers.shieldObject.elapsed >= this.timers.shieldObject.interval) {
             this.spawnShieldObject();
@@ -819,7 +713,6 @@ class MainScene extends Phaser.Scene {
     }
 
     handleBootsSpawning(delta) {
-        if (this.isPaused) return;
         this.timers.bootsObject.elapsed += delta;
         if (this.timers.bootsObject.elapsed >= this.timers.bootsObject.interval) {
             this.spawnBootsObject();
@@ -828,40 +721,41 @@ class MainScene extends Phaser.Scene {
     }
 
     handleBootsEffect(delta) {
-        if (this.isPaused) return;
-
         if (this.hasBoots) {
             this.timers.bootsEffect.elapsed += delta;
             if (this.timers.bootsEffect.elapsed >= this.timers.bootsEffect.duration) {
                 this.hasBoots = false;
+                this.player.fillColor = this.playerColor;
+                this.player.body.setVelocityY(this.originalPlayerJumpSpeed);
             }
         }
     }
 
     updateScoreIndicators() {
-        if (this.isPaused) return;
-
         const squareSize = 20;
         const padding = 5;
         const startX = this.scale.width - (3 * squareSize + 2 * padding) - 10;
         const startY = 10;
 
         const positions = [
-            { x: startX + squareSize / 2, y: startY + squareSize / 2 },
-            { x: startX + squareSize + padding + squareSize / 2, y: startY + squareSize / 2 },
-            { x: startX + 2 * (squareSize + padding) + squareSize / 2, y: startY + squareSize / 2 }
+            { x: startX + squareSize / 2, y: startY + squareSize / 2 }, // Izquierda
+            { x: startX + squareSize + padding + squareSize / 2, y: startY + squareSize / 2 }, // Centro
+            { x: startX + 2 * (squareSize + padding) + squareSize / 2, y: startY + squareSize / 2 }  // Derecha
         ];
 
         for (let i = 0; i < this.scoreThresholds.length; i++) {
             if (this.score >= this.scoreThresholds[i] && !this.indicatorsChanged[i]) {
+                // Destruir el rectángulo actual
                 this.scoreIndicators[i].destroy();
 
+                // Crear el nuevo sprite de la imagen
                 const newIndicator = this.add.sprite(positions[i].x, positions[i].y, this.indicatorKeys[i])
                     .setOrigin(0.5, 0.5)
                     .setScale(0.8)
                     .setScrollFactor(0)
                     .setDepth(10);
 
+                // Actualizar la referencia en el array
                 this.scoreIndicators[i] = newIndicator;
                 this.indicatorsChanged[i] = true;
             }
@@ -869,9 +763,7 @@ class MainScene extends Phaser.Scene {
     }
 
     update(time, delta) {
-        if (this.isPaused) return;
-
-        if (!this.gameStarted || !this.player.getData('isAlive')) return;
+        if (!this.gameStarted || !this.player.getData('isAlive') || this.isPaused) return;
 
         this.handlePlayerMovement();
         this.handlePlatformCollisions();
@@ -890,7 +782,7 @@ class MainScene extends Phaser.Scene {
         this.updateScoreIndicators();
 
         const cameraBottom = this.cameras.main.scrollY + this.scale.height;
-        if (this.player.y > cameraBottom + 100) {
+        if (this.player.y > cameraBottom + 100) { // Ajusta el valor '100' según necesites
             this.endGame();
         }
     }
