@@ -1,0 +1,31 @@
+// Colores
+$primary-color: #083AB5;
+$secondary-color: #2A67FB;
+
+// text 
+$font-title: 'Press Start 2P', monospace;
+$font-text: 'Fira Mono', monospace;
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: $font-text;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    gap: 10px;
+    max-width: 850px;
+}
+
+.credits {
+    font-weight: 700;
+    font-size: 10px;
+    color: $secondary-color;
+}

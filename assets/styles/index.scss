@@ -1,0 +1,237 @@
+@import 'variables';
+
+body {
+    background-image: url('../img/index/fondo.svg');
+    background-size: calc(100% / 3) cover;
+    background-repeat: repeat-x;
+    background-position: center;
+}
+
+main {
+    .star_img {
+        width: 650px;
+        z-index: 99;
+    }
+
+    .star_text {
+        font-family: $font-title;
+        color: $secondary-color;
+        font-size: 12px;
+        font-weight: 400;
+        text-align: center;
+    }
+
+    h2 {
+        color: $secondary-color;
+        font-size: 18px;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .star_input {
+        height: 40px;
+        width: 288px;
+        border-radius: 12px;
+        border-color: 1px solid #87A9FC;
+        font-family: $font-text;
+        font-size: 14px;
+        font-weight: 500;
+        padding: 10px;
+
+        &::placeholder {
+            color: #5F8DFC;
+        }
+    }
+
+    .star_btn {
+        border-radius: 12px;
+        border-color: 1px solid $primary-color;
+        width: 287px;
+        height: 48px;
+        background: linear-gradient(90deg, #0E4DF1 0%, #2A67FB 100%);
+        color: #F8FAFE;
+        cursor: pointer;
+        font-family: $font-text;
+        font-weight: 700;
+        font-size: 15px;
+        transition: transform 0.2s;
+
+        &:hover {
+            animation: pulse 0.6s infinite;
+        }
+
+        &:active {
+            background: linear-gradient(90deg, #ff0000 0%, #ff4d4d 100%);
+        }
+    }
+
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.08);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    .footer_container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin-top: 20px;
+        gap: 5px;
+
+        a {
+            color: $secondary-color;
+            font-weight: 700;
+            font-size: 13px;
+            text-decoration: none;
+        }
+
+        .hubito {
+            position: absolute;
+            right: 35%;
+            z-index: -10;
+            width: 57px;
+            height: 92px;
+        }
+    }
+}
+
+.premios_container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+
+    .premios {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin: 0 10px;
+
+        .premios_image {
+            width: 60px;
+            height: 60px;
+        }
+
+        .premios_text {
+            font-size: 11px;
+            font-weight: 700;
+            color: $primary-color;
+        }
+    }
+}
+
+// Popup del tutorial
+.tutorial-popup {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.7);
+    justify-content: center;
+    align-items: center;
+}
+
+.popup-content {
+    background-color: #F6F9FF;
+    margin: auto;
+    padding: 20px;
+    border: 2px solid $primary-color;
+    width: 80%;
+    max-width: 600px;
+    border-radius: 10px;
+    position: relative;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    animation-name: animatetop;
+    animation-duration: 0.4s;
+
+    .tutorial_title {
+        font-weight: 700;
+        font-size: 18px;
+        color: $secondary-color;
+        text-align: center;
+    }
+
+    .tutorial_text {
+        text-align: center;
+        font-weight: 500;
+        font-size: 14px;
+        color: $secondary-color;
+        margin-bottom: 20px;
+    }
+
+    .instructions_container {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        margin-bottom: 15px;
+
+        img {
+            width: 45px;
+            height: 72px;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        p {
+            color: $secondary-color;
+            font-family: $font-text;
+            font-size: 14px;
+            font-weight: 500;
+            flex-grow: 1;
+        }
+    }
+
+    .credits {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 12px;
+        color: $secondary-color;
+    }
+}
+
+.close-button {
+    color: $secondary-color;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+
+    &:hover,
+    &:focus {
+        color: black;
+        text-decoration: none;
+    }
+}
+
+@keyframes animatetop {
+    from {top: -300px; opacity: 0}
+    to {top: 0; opacity: 1}
+}
