@@ -22,9 +22,10 @@ class MainScene extends Phaser.Scene {
         this.hasShield = false;
         this.hasBoots = false;
         this.specialObjectsGravity = 10;
-        this.shieldGlowEffect = null; // Variable para el efecto de brillo
+        this.shieldGlowEffect = null; // Variable para el efecto de brillo del escudo
+        this.fallingWarningIndicator = null; // Variable para el indicador de peligro de ladrillo
         this.timers = {
-            damageObject: { elapsed: 0, interval: Phaser.Math.Between(8000, 12000) },
+            damageObject: { elapsed: 0, interval: Phaser.Math.Between(8000, 12000), warningDuration: 1000 }, // Añadido warningDuration
             scoreBonus: { elapsed: 0, interval: 10000 },
             shieldObject: { elapsed: 0, interval: 18000 },
             bootsObject: { elapsed: 0, interval: 15000 },
@@ -32,10 +33,10 @@ class MainScene extends Phaser.Scene {
         };
         // Variables para los sonidos
         this.jumpSound = null;
-        this.starSound = null; // Cambié el nombre de cortinillaSound a starSound para que coincida con preload
+        this.starSound = null;
         this.hitSound = null;
         this.pickupSound = null;
-        this.musicSound = null; // Para la música de fondo
+        this.musicSound = null;
     }
 
     preload() {
@@ -60,8 +61,8 @@ class MainScene extends Phaser.Scene {
         this.load.image('cupon', './assets/img/award02.png');
         this.load.image('book', './assets/img/award03.png');
 
-        // Precarga un pixel blanco para el efecto de brillo (opcional)
-        this.load.image('whitePixel', './assets/img/white_pixel.png');
+        // NO necesitamos precargar un pixel blanco, Phaser PostFX lo genera internamente
+        // this.load.image('whitePixel', './assets/img/white_pixel.png');
 
         // Cargamos los archivos de sonido
         this.load.audio('jump', './assets/sounds/jump.wav');
@@ -77,7 +78,7 @@ class MainScene extends Phaser.Scene {
     create() {
         this.setupScene();
         this.setupControls();
-        this.setupSounds(); // Se inicializan los objetos de sonido aquí
+        this.setupSounds();
         this.setupScoreIndicators();
         this.gameOverImage = this.add.image(this.scale.width / 2, this.scale.height / 2, 'endgame').setOrigin(0.5).setDepth(100).setScale(0.5).setVisible(false);
         this.setupPausePopup();
@@ -100,7 +101,7 @@ class MainScene extends Phaser.Scene {
         this.bg = this.add.image(0, 0, 'background')
             .setOrigin(0)
             .setDisplaySize(this.scale.width, this.scale.height)
-            .setScrollFactor(0); // Fondo fijo
+            .setScrollFactor(0);
     }
 
     setupSounds() {
@@ -117,12 +118,6 @@ class MainScene extends Phaser.Scene {
             loop: true,
             volume: 0.50,
         });
-
-        // La reproducción de los sonidos se moverá a startGame()
-        // this.starSound.on('complete', () => {
-        //     this.musicSound.play();
-        // });
-        // this.starSound.play();
     }
 
     setupText() {
@@ -166,14 +161,14 @@ class MainScene extends Phaser.Scene {
     setupScoreIndicators() {
         const squareSize = 20;
         const padding = 5;
-        const startX = this.scale.width - (3 * squareSize + 2 * padding) - 10; // Posición inicial en la derecha
+        const startX = this.scale.width - (3 * squareSize + 2 * padding) - 10;
         const startY = 10;
         const colorGray = 0x808080;
 
         this.scoreIndicators = [
-            this.add.rectangle(startX, startY, squareSize, squareSize, colorGray).setOrigin(0, 0).setScrollFactor(0).setDepth(10), // Izquierda
-            this.add.rectangle(startX + squareSize + padding, startY, squareSize, squareSize, colorGray).setOrigin(0, 0).setScrollFactor(0).setDepth(10), // Centro
-            this.add.rectangle(startX + 2 * (squareSize + padding), startY, squareSize, squareSize, colorGray).setOrigin(0, 0).setScrollFactor(0).setDepth(10)  // Derecha
+            this.add.rectangle(startX, startY, squareSize, squareSize, colorGray).setOrigin(0, 0).setScrollFactor(0).setDepth(10),
+            this.add.rectangle(startX + squareSize + padding, startY, squareSize, squareSize, colorGray).setOrigin(0, 0).setScrollFactor(0).setDepth(10),
+            this.add.rectangle(startX + 2 * (squareSize + padding), startY, squareSize, squareSize, colorGray).setOrigin(0, 0).setScrollFactor(0).setDepth(10)
         ];
 
         this.scoreThresholds = [25, 50, 100];
@@ -192,7 +187,6 @@ class MainScene extends Phaser.Scene {
 
     setupControls() {
         this.cursors = this.input.keyboard.createCursorKeys();
-        // Cuando el jugador presione espacio o haga clic, llamaremos a startGame()
         this.input.keyboard.on('keydown-SPACE', () => this.startGame());
         this.input.on('pointerdown', () => this.startGame());
         this.setupTouchControls();
@@ -230,7 +224,6 @@ class MainScene extends Phaser.Scene {
                 this.rightPressed = false;
             });
         } else {
-            // Soporte para controles de escritorio
             const setButtonState = (btn, state) => {
                 ['pointerdown', 'pointerup', 'pointerout', 'pointercancel'].forEach(event =>
                     btn?.addEventListener(event, () => this[state] = event === 'pointerdown')
@@ -273,27 +266,26 @@ class MainScene extends Phaser.Scene {
 
         if (this.isPaused) {
             this.physics.pause();
-            if (this.musicSound && this.musicSound.isPlaying) { // Verifica si está sonando antes de pausar
+            if (this.musicSound && this.musicSound.isPlaying) {
                 this.musicSound.pause();
             }
-            if (this.starSound && this.starSound.isPlaying) { // Verifica si está sonando antes de pausar
+            if (this.starSound && this.starSound.isPlaying) {
                 this.starSound.pause();
             }
             this.pausePopup.classList.remove('hidden');
             this.popupScoreValue.textContent = this.score;
         } else {
             this.physics.resume();
-            if (this.musicSound && this.musicSound.isPaused) { // Verifica si está pausada antes de reanudar
+            if (this.musicSound && this.musicSound.isPaused) {
                 this.musicSound.resume();
             }
-            if (this.starSound && this.starSound.isPaused) { // Verifica si está pausada antes de reanudar
+            if (this.starSound && this.starSound.isPaused) {
                 this.starSound.resume();
             }
             this.pausePopup.classList.add('hidden');
         }
     }
 
-    // Modificación principal aquí
     startGame() {
         if (this.gameStarted) return;
 
@@ -304,7 +296,6 @@ class MainScene extends Phaser.Scene {
         this.player.body.setVelocityY(-550);
         this.player.setTexture('hubitojump');
 
-        // *** Mover la lógica de reproducción de audio aquí ***
         if (this.starSound && !this.starSound.isPlaying) {
             this.starSound.play();
             this.starSound.on('complete', () => {
@@ -313,10 +304,8 @@ class MainScene extends Phaser.Scene {
                 }
             });
         } else if (this.musicSound && !this.musicSound.isPlaying) {
-            // Si la cortinilla ya se reprodujo o no existe, solo inicia la música
             this.musicSound.play();
         }
-        // ******************************************************
     }
 
     showGameOver() {
@@ -339,7 +328,7 @@ class MainScene extends Phaser.Scene {
             this.musicSound.stop();
         }
         if (this.starSound && this.starSound.isPlaying) {
-            this.starSound.stop(); // También detener la cortinilla si estaba sonando
+            this.starSound.stop();
         }
         this.pausePopup.classList.add('hidden');
     }
@@ -578,17 +567,52 @@ class MainScene extends Phaser.Scene {
     }
 
     spawnFallingDamageObject() {
-        const x = Phaser.Math.Between(30, this.scale.width - 30);
-        const y = this.cameras.main.scrollY - this.scale.height * 1.5;
-        const brick = this.physics.add.sprite(x, y, 'brick');
-        brick.setScale(1.3);
-        brick.body.setCircle((brick.width * 2) / 20);
-        brick.body.gravity.y = 1;
+        const xPos = Phaser.Math.Between(30, this.scale.width - 30);
+        const yPos = this.cameras.main.scrollY - this.scale.height * 0.1; // Ajustado para que el indicador sea visible en la parte superior
 
-        brick.setData('type', 'damage');
-        this.fallingObjects.add(brick);
-        brick.alias = 'Ladrillo';
-        return brick;
+        // Mostrar indicador de peligro antes de que caiga el ladrillo
+        this.showDangerIndicator(xPos, yPos);
+
+        // Retrasar la creación del ladrillo para que el indicador sea visible primero
+        this.time.delayedCall(this.timers.damageObject.warningDuration, () => {
+            if (!this.player.getData('isAlive')) return;
+
+            const ySpawn = this.cameras.main.scrollY - 50; 
+            const brick = this.physics.add.sprite(xPos, ySpawn, 'brick');
+            brick.setScale(1.3);
+            brick.body.setCircle((brick.width * 2) / 20);
+            brick.body.gravity.y = 1;
+
+            brick.setData('type', 'damage');
+            this.fallingObjects.add(brick);
+            brick.alias = 'Ladrillo';
+        });
+    }
+
+    // Nuevo método para mostrar el indicador de peligro
+    showDangerIndicator(x, y) {
+        if (this.fallingWarningIndicator) {
+            this.fallingWarningIndicator.destroy(); 
+        }
+
+        // Crea un círculo rojo
+        this.fallingWarningIndicator = this.add.graphics();
+        this.fallingWarningIndicator.fillStyle(0xFF0000, 0.8);
+        this.fallingWarningIndicator.fillCircle(x, y, 10);
+
+        // Hace que el indicador parpadee
+        this.tweens.add({
+            targets: this.fallingWarningIndicator,
+            alpha: { from: 0.8, to: 0.2 },
+            duration: 200,
+            ease: 'Sine.InOut',
+            yoyo: true,
+            repeat: Math.ceil(this.timers.damageObject.warningDuration / 400), 
+            onComplete: () => {
+                this.fallingWarningIndicator?.destroy();
+                this.fallingWarningIndicator = null;
+            }
+        });
     }
 
     spawnScoreBonusObject() {
@@ -682,7 +706,7 @@ class MainScene extends Phaser.Scene {
     handleShieldCollision(player, shield) {
         if (!this.hasShield) {
             this.hasShield = true;
-            this.activateShieldGlow();
+            this.activateShieldGlow(); // Activa el efecto de brillo
             shield.destroy();
             this.shieldObject = null;
             this.pickupSound.play();
@@ -693,6 +717,7 @@ class MainScene extends Phaser.Scene {
         this.shieldGlowEffect = this.player.postFX.addGlow(0xffffff, 2, 0, false, 0.1, 32);
     }
 
+    // Nuevo método para desactivar el brillo del escudo
     deactivateShieldGlow() {
         if (this.shieldGlowEffect) {
             this.player.postFX.remove(this.shieldGlowEffect);
@@ -719,7 +744,7 @@ class MainScene extends Phaser.Scene {
         this.timers.scoreBonus.elapsed += delta;
 
         if (this.timers.damageObject.elapsed >= this.timers.damageObject.interval) {
-            this.spawnFallingDamageObject();
+            this.spawnFallingDamageObject(); 
             this.timers.damageObject.elapsed = 0;
             this.timers.damageObject.interval = Phaser.Math.Between(5000, 10000);
         }
@@ -842,7 +867,15 @@ const config = {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH
     },
-    parent: 'game-container'
+    parent: 'game-container',
+    // Asegúrate de que el renderer soporta PostFX
+    render: {
+        // webgl: {
+        //     antialias: true,
+        //     multiTexture: true
+        // }
+        // Si tienes problemas, puedes forzar WebGL, aunque AUTO suele ser suficiente
+    }
 };
 
 new Phaser.Game(config);
