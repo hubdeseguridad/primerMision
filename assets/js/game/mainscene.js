@@ -209,7 +209,7 @@ class MainScene extends Phaser.Scene {
         this.input.keyboard.on('keydown-P', () => this.togglePause());
     }
 
-     addStartGameListeners() {
+      addStartGameListeners() {
         this.spaceKeyListener = this.input.keyboard.on('keydown-SPACE', this.startGame, this);
         this.pointerDownListener = this.input.on('pointerdown', this.startGame, this);
     }
@@ -456,10 +456,12 @@ class MainScene extends Phaser.Scene {
         this.platforms = this.physics.add.staticGroup();
         this.platformSpacing = 100;
         this.maxPlatforms = 15;
+ 
+        const initialPlatformY = this.scale.height - 30; 
 
         for (let i = 0; i < 10; i++) {
             const type = Math.random() < this.bombPlatformPercentage ? 'bomb' : 'static';
-            this.createPlatform(Phaser.Math.Between(30, this.scale.width - 30), 600 - i * this.platformSpacing, 'static');
+            this.createPlatform(Phaser.Math.Between(30, this.scale.width - 30), initialPlatformY - i * this.platformSpacing, 'static');
         }
 
         this.lastGeneratedPlatformY = this.getHighestPlatformY();
@@ -597,6 +599,7 @@ class MainScene extends Phaser.Scene {
     }
 
     spawnFallingDamageObject() {
+        if (!this.gameStarted || !this.player.getData('isAlive')) return;
         const xPos = Phaser.Math.Between(30, this.scale.width - 30);
         const yPos = this.cameras.main.scrollY - this.scale.height * 0.1;
 
@@ -860,4 +863,4 @@ class MainScene extends Phaser.Scene {
         }
     }
 }
-export default MainScene; 
+export default MainScene;
