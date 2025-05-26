@@ -76,4 +76,16 @@ body p {
   padding: 10px;
   border-radius: 4px;
   font-size: 15px;
+}
+#mc_embed_shell input[type=submit] {
+  background-color: #2A67FB;
+  color: #fff;
+  border: none;
+  text-align: center;
+  padding: 10px 20px;
+  padding-bottom: 40px;
+  border-radius: 4px;
+  font-size: 15px;
+  cursor: pointer;
+  width: 195px;
 }/*# sourceMappingURL=premios.css.map */
