@@ -86,22 +86,22 @@ class MainScene extends Phaser.Scene {
         this.load.audio('end', './assets/sounds/gameover.mp3');
     }
 
-    create() {
-        this.initGameState(); // Asegura que el estado se reinicie
+ create() {
+    this.initGameState(); // Asegura que el estado se reinicie
 
-        // MUY IMPORTANTE: Muestra el botón de pausa HTML cuando la MainScene se crea/reinicia
-        const pauseButton = document.querySelector('.pause-btn');
-        if (pauseButton) {
-            pauseButton.classList.remove('hidden'); // Asegura que el botón sea visible
-        }
-
-        this.setupScene();
-        this.setupControls();
-        this.setupSounds();
-        this.setupScoreIndicators();
-        this.gameOverImage = this.add.image(this.scale.width / 2, this.scale.height / 2, 'endgame').setOrigin(0.5).setDepth(100).setScale(0.5).setVisible(false);
-        this.setupPausePopup();
+    // MUY IMPORTANTE: Muestra el botón de pausa HTML cuando la MainScene se crea/reinicia
+    const pauseButton = document.querySelector('.pause-btn');
+    if (pauseButton) {
+        pauseButton.classList.remove('hidden'); // Asegura que el botón sea visible
     }
+
+    this.setupScene();
+    this.setupControls();
+    this.setupSounds();
+    this.setupScoreIndicators();
+    this.gameOverImage = this.add.image(this.scale.width / 2, this.scale.height / 2, 'endgame').setOrigin(0.5).setDepth(100).setScale(0.5).setVisible(false);
+    this.setupPausePopup();
+}
 
     setupScene() {
         this.setupBackground();
@@ -327,28 +327,28 @@ class MainScene extends Phaser.Scene {
         }
     }
 
-    endGame() {
-        this.player.setData('isAlive', false);
-        this.physics.pause();
-        this.player.body.setVelocityY(0);
-        this.player.body.allowGravity = false;
+endGame() {
+    this.player.setData('isAlive', false);
+    this.physics.pause();
+    this.player.body.setVelocityY(0);
+    this.player.body.allowGravity = false;
 
-        if (this.musicSound && this.musicSound.isPlaying) {
-            this.musicSound.stop();
-        }
-        if (this.starSound && this.starSound.isPlaying) {
-            this.starSound.stop();
-        }
-        this.pausePopup.classList.add('hidden'); // Esto oculta el popup de pausa dentro de Phaser
-
-        // MUY IMPORTANTE: Oculta el botón de pausa HTML al terminar el juego
-        const pauseButton = document.querySelector('.pause-btn'); // Asume que tu botón tiene esta clase
-        if (pauseButton) {
-            pauseButton.classList.add('hidden'); // Oculta el botón
-        }
-
-        this.scene.start('GameOverScene', { score: this.score });
+    if (this.musicSound && this.musicSound.isPlaying) {
+        this.musicSound.stop();
     }
+    if (this.starSound && this.starSound.isPlaying) {
+        this.starSound.stop();
+    }
+    this.pausePopup.classList.add('hidden'); // Esto oculta el popup de pausa dentro de Phaser
+
+    // MUY IMPORTANTE: Oculta el botón de pausa HTML al terminar el juego
+    const pauseButton = document.querySelector('.pause-btn'); // Asume que tu botón tiene esta clase
+    if (pauseButton) {
+        pauseButton.classList.add('hidden'); // Oculta el botón
+    }
+
+    this.scene.start('GameOverScene', { score: this.score });
+}
 
     isMobileDevice() {
         return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -882,6 +882,16 @@ class GameOverScene extends Phaser.Scene {
         this.finalScore = data.score;
     }
 
+    preload() {
+        // Oculta el botón de pausa si existe al entrar a GameOverScene
+        const pauseBtn = document.getElementById('pause-btn');
+        if (pauseBtn) {
+            pauseBtn.classList.add('hidden');
+            pauseBtn.style.visibility = 'hidden';
+            pauseBtn.style.display = 'none';
+        }
+    }
+
     create() {
         // Fondo semi-transparente
         this.add.rectangle(0, 0, this.scale.width, this.scale.height, 0xffffff, 0.1).setOrigin(0);
@@ -1022,13 +1032,14 @@ class GameOverScene extends Phaser.Scene {
     }
 
     claimPrizes() {
-        window.location.href = 'index.html';
+        window.location.href = 'premios.html';
         const pauseButton = document.querySelector('.pause-btn');
         if (pauseButton) {
             pauseButton.classList.add('hidden');
         }
     }
 }
+
 const config = {
     type: Phaser.AUTO,
     width: 360,
