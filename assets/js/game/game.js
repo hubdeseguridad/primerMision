@@ -1,4 +1,4 @@
-import MainScene from  './mainscene.js'; 
+import MainScene from './mainscene.js';
 import GameOverScene from './gameover.js';
 
 const config = {
