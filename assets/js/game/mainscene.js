@@ -1,3 +1,5 @@
+// js/MainScene.js
+
 class MainScene extends Phaser.Scene {
     constructor() {
         super('MainScene');
@@ -7,7 +9,7 @@ class MainScene extends Phaser.Scene {
         this.leftPressed = false;
         this.rightPressed = false;
         this.gameStarted = false;
-        this.score = 0; // Se reseteará aquí
+        this.score = 0;
         this.isPaused = false;
         this.originalPlayerJumpSpeed = -550;
         this.lastTouchedPlatformY = Infinity;
@@ -34,14 +36,13 @@ class MainScene extends Phaser.Scene {
         this.pickupSound = null;
         this.musicSound = null;
 
-        // También reinicia los indicadores de premios si el juego se reinicia
-        if (this.scoreIndicators) { // Añade esta condición para evitar errores si no existen todavía
+        if (this.scoreIndicators) {
             this.scoreIndicators.forEach(indicator => {
-                if (indicator && indicator.destroy) { // Asegura que el objeto exista y tenga método destroy
+                if (indicator && indicator.destroy) {
                     indicator.destroy();
                 }
             });
-            this.scoreIndicators = []; // Resetear el array
+            this.scoreIndicators = [];
         }
         this.indicatorsChanged = [false, false, false];
     }
@@ -52,13 +53,11 @@ class MainScene extends Phaser.Scene {
         this.load.image('platform01', './assets/img/viga.png');
         this.load.image('platform02', './assets/img/viga02.png');
 
-        // Cargamos archivos de hubito
         this.load.image('hubito', './assets/img/hubito01.png');
         this.load.image('hubito2', './assets/img/hubito02.png');
         this.load.image('hubitojump', './assets/img/hubitojump.png');
         this.load.image('hubitojump2', './assets/img/hubitojump2.png');
 
-        // Cargamos archivos de objetos
         this.load.image('brick', './assets/img/brick.png');
         this.load.image('boots', './assets/img/botita.png');
         this.load.image('helmet', './assets/img/casco.png');
@@ -68,40 +67,35 @@ class MainScene extends Phaser.Scene {
         this.load.image('cupon', './assets/img/award02.png');
         this.load.image('book', './assets/img/award03.png');
 
-        this.load.svg('award01_GO', './assets/img/Index/LIBRO.svg', { width: 100, height: 100 }); // Es el libro en tu descripción
-        this.load.svg('award02_GO', './assets/img/Index/CUPÓN.svg', { width: 100, height: 100 }); // Es el cupón
-        this.load.svg('award03_GO', './assets/img/Index/MONEDA.svg', { width: 100, height: 100 }); // Es la moneda
+        this.load.svg('award01_GO', './assets/img/Index/LIBRO.svg', { width: 100, height: 100 });
+        this.load.svg('award02_GO', './assets/img/Index/CUPÓN.svg', { width: 100, height: 100 });
+        this.load.svg('award03_GO', './assets/img/Index/MONEDA.svg', { width: 100, height: 100 });
 
-        // NO necesitamos precargar un pixel blanco, Phaser PostFX lo genera internamente
-        // this.load.image('whitePixel', './assets/img/white_pixel.png');
-
-        // Cargamos los archivos de sonido
         this.load.audio('jump', './assets/sounds/jump.wav');
         this.load.audio('star', './assets/sounds/Cortinilla.wav');
         this.load.audio('hit', './assets/sounds/hitHurt.wav');
         this.load.audio('pickup', './assets/sounds/pickup.wav');
 
-        // Cargamos archivos de sonido de fondo
         this.load.audio('music', './assets/sounds/soundtrack.mp3');
         this.load.audio('end', './assets/sounds/gameover.mp3');
     }
 
- create() {
-    this.initGameState(); // Asegura que el estado se reinicie
+    create() {
+        this.initGameState();
 
-    // MUY IMPORTANTE: Muestra el botón de pausa HTML cuando la MainScene se crea/reinicia
-    const pauseButton = document.querySelector('.pause-btn');
-    if (pauseButton) {
-        pauseButton.classList.remove('hidden'); // Asegura que el botón sea visible
+        const pauseButton = document.querySelector('.pause-btn');
+        if (pauseButton) {
+            pauseButton.classList.remove('hidden');
+        }
+
+        this.setupScene();
+        this.setupControls();
+        this.setupSounds();
+        this.setupScoreIndicators();
+        this.gameOverImage = this.add.image(this.scale.width / 2, this.scale.height / 2, 'endgame').setOrigin(0.5).setDepth(100).setScale(0.5).setVisible(false);
+        this.setupPausePopup();
+        this.addStartGameListeners();
     }
-
-    this.setupScene();
-    this.setupControls();
-    this.setupSounds();
-    this.setupScoreIndicators();
-    this.gameOverImage = this.add.image(this.scale.width / 2, this.scale.height / 2, 'endgame').setOrigin(0.5).setDepth(100).setScale(0.5).setVisible(false);
-    this.setupPausePopup();
-}
 
     setupScene() {
         this.setupBackground();
@@ -136,6 +130,12 @@ class MainScene extends Phaser.Scene {
         this.musicSound = this.sound.add('music', {
             loop: true,
             volume: 0.50,
+        });
+
+        // ¡Añade esto para inicializar el sonido 'end'!
+        this.endSound = this.sound.add('end', {
+            loop: false,
+            volume: 0.75, // Ajusta el volumen a tu gusto
         });
     }
 
@@ -182,12 +182,11 @@ class MainScene extends Phaser.Scene {
         const padding = 5;
         const startX = this.scale.width - (3 * squareSize + 2 * padding) - 10;
         const startY = 10;
-        const colorGray = 0x808080;
 
         this.scoreIndicators = [
-            this.add.rectangle(startX, startY, squareSize, squareSize, colorGray).setOrigin(0, 0).setScrollFactor(0).setDepth(10),
-            this.add.rectangle(startX + squareSize + padding, startY, squareSize, squareSize, colorGray).setOrigin(0, 0).setScrollFactor(0).setDepth(10),
-            this.add.rectangle(startX + 2 * (squareSize + padding), startY, squareSize, squareSize, colorGray).setOrigin(0, 0).setScrollFactor(0).setDepth(10)
+            this.add.rectangle(startX, startY, squareSize, squareSize, 0x808080).setOrigin(0, 0).setScrollFactor(0).setDepth(10),
+            this.add.rectangle(startX + squareSize + padding, startY, squareSize, squareSize, 0x808080).setOrigin(0, 0).setScrollFactor(0).setDepth(10),
+            this.add.rectangle(startX + 2 * (squareSize + padding), startY, squareSize, squareSize, 0x808080).setOrigin(0, 0).setScrollFactor(0).setDepth(10)
         ];
 
         this.scoreThresholds = [25, 50, 100];
@@ -206,10 +205,13 @@ class MainScene extends Phaser.Scene {
 
     setupControls() {
         this.cursors = this.input.keyboard.createCursorKeys();
-        this.input.keyboard.on('keydown-SPACE', () => this.startGame());
-        this.input.on('pointerdown', () => this.startGame());
         this.setupTouchControls();
         this.input.keyboard.on('keydown-P', () => this.togglePause());
+    }
+
+     addStartGameListeners() {
+        this.spaceKeyListener = this.input.keyboard.on('keydown-SPACE', this.startGame, this);
+        this.pointerDownListener = this.input.on('pointerdown', this.startGame, this);
     }
 
     setupTouchControls() {
@@ -306,13 +308,13 @@ class MainScene extends Phaser.Scene {
     }
 
     startGame() {
-        if (this.gameStarted) return;
+        if (this.gameStarted) return; 
 
         this.gameStarted = true;
 
-        this.startText.destroy();
+        this.startText.destroy(); 
         this.player.body.allowGravity = true;
-        this.player.body.setVelocityY(-550);
+        this.player.body.setVelocityY(this.originalPlayerJumpSpeed);
         this.player.setTexture('hubitojump');
 
         if (this.starSound && !this.starSound.isPlaying) {
@@ -325,30 +327,41 @@ class MainScene extends Phaser.Scene {
         } else if (this.musicSound && !this.musicSound.isPlaying) {
             this.musicSound.play();
         }
+
+        this.input.keyboard.off('keydown-SPACE', this.startGame, this);
+        this.input.off('pointerdown', this.startGame, this);
     }
 
-endGame() {
-    this.player.setData('isAlive', false);
-    this.physics.pause();
-    this.player.body.setVelocityY(0);
-    this.player.body.allowGravity = false;
+    endGame() {
+        this.player.setData('isAlive', false);
+        this.physics.pause();
+        this.player.body.setVelocityY(0);
+        this.player.body.allowGravity = false;
 
-    if (this.musicSound && this.musicSound.isPlaying) {
-        this.musicSound.stop();
-    }
-    if (this.starSound && this.starSound.isPlaying) {
-        this.starSound.stop();
-    }
-    this.pausePopup.classList.add('hidden'); // Esto oculta el popup de pausa dentro de Phaser
+        if (this.musicSound && this.musicSound.isPlaying) {
+            this.musicSound.stop();
+        }
+        if (this.starSound && this.starSound.isPlaying) {
+            this.starSound.stop();
+        }
 
-    // MUY IMPORTANTE: Oculta el botón de pausa HTML al terminar el juego
-    const pauseButton = document.querySelector('.pause-btn'); // Asume que tu botón tiene esta clase
-    if (pauseButton) {
-        pauseButton.classList.add('hidden'); // Oculta el botón
-    }
+        // ¡Reproducir el sonido de Game Over aquí!
+        if (this.endSound && !this.endSound.isPlaying) {
+            this.endSound.play();
+        }
 
-    this.scene.start('GameOverScene', { score: this.score });
-}
+        this.pausePopup.classList.add('hidden');
+
+        const pauseButton = document.querySelector('.pause-btn');
+        if (pauseButton) {
+            pauseButton.classList.add('hidden');
+        }
+
+        // Retrasamos un poco el cambio de escena para que el sonido termine de reproducirse
+        this.time.delayedCall(2000, () => { // 2000 ms = 2 segundos, ajusta si es necesario
+            this.scene.start('GameOverScene', { score: this.score });
+        }, [], this);
+    }
 
     isMobileDevice() {
         return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -585,12 +598,10 @@ endGame() {
 
     spawnFallingDamageObject() {
         const xPos = Phaser.Math.Between(30, this.scale.width - 30);
-        const yPos = this.cameras.main.scrollY - this.scale.height * 0.1; // Ajustado para que el indicador sea visible en la parte superior
+        const yPos = this.cameras.main.scrollY - this.scale.height * 0.1;
 
-        // Mostrar indicador de peligro antes de que caiga el ladrillo
         this.showDangerIndicator(xPos, yPos);
 
-        // Retrasar la creación del ladrillo para que el indicador sea visible primero
         this.time.delayedCall(this.timers.damageObject.warningDuration, () => {
             if (!this.player.getData('isAlive')) return;
 
@@ -606,18 +617,15 @@ endGame() {
         });
     }
 
-    // Nuevo método para mostrar el indicador de peligro
     showDangerIndicator(x, y) {
         if (this.fallingWarningIndicator) {
             this.fallingWarningIndicator.destroy();
         }
 
-        // Crea un círculo rojo
         this.fallingWarningIndicator = this.add.graphics();
         this.fallingWarningIndicator.fillStyle(0xFF0000, 0.8);
         this.fallingWarningIndicator.fillCircle(x, y, 10);
 
-        // Hace que el indicador parpadee
         this.tweens.add({
             targets: this.fallingWarningIndicator,
             alpha: { from: 0.8, to: 0.2 },
@@ -689,33 +697,22 @@ endGame() {
                 this.hitSound.play();
                 fallingObject.destroy();
             } else {
-                // *************** CAMBIOS CLAVE AQUÍ ***************
-                this.player.setData('isAlive', false); // Marcar como muerto inmediatamente
-                fallingObject.destroy(); // Destruir el ladrillo inmediatamente
+                this.player.setData('isAlive', false);
+                fallingObject.destroy();
 
-                // Llama a endGame inmediatamente después de marcar al jugador como muerto
-                // para asegurar que la escena de Game Over se active.
                 this.endGame();
 
-                // Puedes mantener este tween para una pequeña animación si lo deseas,
-                // pero ya no será el que dispare el endGame.
                 this.tweens.add({
                     targets: player,
                     y: player.y - 10,
                     duration: 200,
                     ease: 'Sine.out',
                     onComplete: () => {
-                        // Opcional: Si quieres que el jugador caiga después de un pequeño salto,
-                        // asegúrate de que la gravedad se active aquí si no lo hace endGame.
-                        // Sin embargo, endGame ya maneja la pausa de física y reinicio.
-                        // Si player.body.allowGravity = false; en endGame() es suficiente,
-                        // entonces no necesitas reestablecerla aquí.
-                        player.body.setVelocityY(0); // Asegura que no siga subiendo por el tween
-                        player.body.allowGravity = false; // Desactiva gravedad si no lo hizo endGame
-                        player.setTexture('hubito2'); // Cambia la textura
+                        player.body.setVelocityY(0);
+                        player.body.allowGravity = false;
+                        player.setTexture('hubito2');
                     }
                 });
-                // *************** FIN DE CAMBIOS CLAVE ***************
             }
         } else if (type === 'score') {
             this.score += 10;
@@ -728,7 +725,7 @@ endGame() {
     handleShieldCollision(player, shield) {
         if (!this.hasShield) {
             this.hasShield = true;
-            this.activateShieldGlow(); // Activa el efecto de brillo
+            this.activateShieldGlow();
             shield.destroy();
             this.shieldObject = null;
             this.pickupSound.play();
@@ -739,7 +736,6 @@ endGame() {
         this.shieldGlowEffect = this.player.postFX.addGlow(0xffffff, 2, 0, false, 0.1, 32);
     }
 
-    // Nuevo método para desactivar el brillo del escudo
     deactivateShieldGlow() {
         if (this.shieldGlowEffect) {
             this.player.postFX.remove(this.shieldGlowEffect);
@@ -856,214 +852,12 @@ endGame() {
         this.handleShieldSpawning(delta);
         this.handleBootsSpawning(delta);
         this.handleBootsEffect(delta);
-        this.bg.tilePositionY = this.cameras.main.scrollY;
-        this.platforms.children.iterate(platform => {
-            if (platform && platform.update) {
-                platform.update();
-            }
-        });
 
         this.updateScoreIndicators();
 
-        const cameraBottom = this.cameras.main.scrollY + this.scale.height;
-        if (this.player.y > cameraBottom + 100) {
+        if (this.player.y > this.cameras.main.scrollY + this.scale.height * 0.9 && this.player.getData('isAlive')) {
             this.endGame();
         }
     }
 }
-
-class GameOverScene extends Phaser.Scene {
-    constructor() {
-        super('GameOverScene');
-    }
-
-    // El método init recibe los datos pasados desde la escena anterior
-    init(data) {
-        this.finalScore = data.score;
-    }
-
-    preload() {
-        // Oculta el botón de pausa si existe al entrar a GameOverScene
-        const pauseBtn = document.getElementById('pause-btn');
-        if (pauseBtn) {
-            pauseBtn.classList.add('hidden');
-            pauseBtn.style.visibility = 'hidden';
-            pauseBtn.style.display = 'none';
-        }
-    }
-
-    create() {
-        // Fondo semi-transparente
-        this.add.rectangle(0, 0, this.scale.width, this.scale.height, 0xffffff, 0.1).setOrigin(0);
-
-        // 1. Sección del puntaje
-        // Ajustada la posición Y a 0.15 para que esté aún más arriba.
-        this.add.text(this.scale.width / 2, this.scale.height * 0.15, `Puntaje Final: ${this.finalScore}`, {
-            fontSize: '18px',
-            fontFamily: '"Press Start 2P", monospace',
-            fill: '#2A67FB', // Azul vibrante
-            align: 'center'
-        }).setOrigin(0.5);
-
-        // 2. Sección de mensajes dinámicos
-        // Ajustada la posición Y a 0.3 para que esté más arriba.
-        let message = '';
-        if (this.finalScore >= 100) {
-            message = "¡Haz obtenido la máxima puntuación. ¡Ya eres reconocido como HÉROE!";
-        } else if (this.finalScore >= 50) {
-            message = "¡Ups! Estuviste a nada de obtener el primer lugar. ¿Deseas seguir intentando o prefieres reclamar tus premios?";
-        } else if (this.finalScore >= 25) {
-            message = "¡Pudiste hacerlo mejor! ¿Quieres volver a intentar para ganar más premios? ¿O reclamas tus premios actuales?";
-        } else {
-            message = "¡Pudiste hacerlo mejor! ¿Quieres volver a intentar para ganar más premios?";
-        }
-
-        this.add.text(this.scale.width / 2, this.scale.height * 0.3, message, {
-            fontSize: '12px',
-            fontFamily: '"Press Start 2P", monospace',
-            fill: '#2A67FB',
-            align: 'center',
-            wordWrap: { width: this.scale.width * 0.8, useAdvancedWrap: true }
-        }).setOrigin(0.5);
-
-        // 3. Sección de premios (dinámica)
-        // Se mantiene la corrección de eliminar el bloque duplicado.
-        if (this.finalScore >= 25) {
-            // Título "Premios" ajustado la posición Y a 0.45.
-            this.add.text(this.scale.width / 2, this.scale.height * 0.45, 'Premios:', {
-                fontSize: '18px',
-                fontFamily: '"Press Start 2P", monospace',
-                fill: '#2A67FB',
-                align: 'center'
-            }).setOrigin(0.5);
-
-            let prizeY = this.scale.height * 0.52; // Posición Y inicial para el primer premio, ajustada a 0.52.
-            const prizeSpacing = 40; // Espacio entre premios
-
-            // Primer premio (25-49 puntos) - LIBRO
-            if (this.finalScore >= 25) {
-                this.add.image(this.scale.width * 0.10, prizeY, 'award01_GO').setScale(0.30).setOrigin(0.5, 0.5);
-                this.add.text(this.scale.width * 0.20, prizeY, 'Manual + Curso de Primeros Auxilios Básicos', {
-                    fontSize: '12px',
-                    fontFamily: '"Fira Mono", monospace',
-                    fill: '#FFF',
-                    align: 'left'
-                }).setOrigin(0, 0.5);
-                prizeY += prizeSpacing;
-            }
-
-            // Segundo premio (50-99 puntos) - CUPÓN
-            if (this.finalScore >= 50) {
-                this.add.image(this.scale.width * 0.10, prizeY, 'award02_GO').setScale(0.30).setOrigin(0.5, 0.5);
-                this.add.text(this.scale.width * 0.20, prizeY, 'Brigadistas: 4 cursos por el precio de 3', {
-                    fontSize: '12px',
-                    fontFamily: '"Fira Mono", monospace',
-                    fill: '#FFF',
-                    align: 'left'
-                }).setOrigin(0, 0.5);
-                prizeY += prizeSpacing;
-            }
-
-            // Tercer premio (100+ puntos) - MONEDA
-            if (this.finalScore >= 100) {
-                this.add.image(this.scale.width * 0.10, prizeY, 'award03_GO').setScale(0.30).setOrigin(0.5, 0.5);
-                this.add.text(this.scale.width * 0.20, prizeY, '10% descuento en cualquier otro curso', {
-                    fontSize: '12px',
-                    fontFamily: '"Fira Mono", monospace',
-                    fill: '#FFF',
-                    align: 'left'
-                }).setOrigin(0, 0.5);
-            }
-        }
-
-        // 4. Sección de botones
-        // Ajustada la posición Y a 0.8 para que estén más arriba.
-        const buttonY = this.scale.height * 0.8;
-        const buttonSpacing = 20;
-
-        // Botón "Jugar de nuevo"
-        const restartButton = this.add.text(this.scale.width / 2, buttonY, 'JUGAR DE NUEVO', {
-            fontSize: '14px',
-            fontFamily: '"Press Start 2P", monospace',
-            fill: '#2A67FB',
-            backgroundColor: '',
-            padding: { x: 10, y: 8 }
-        })
-        .setOrigin(0.5)
-        .setInteractive({ useHandCursor: true })
-        .on('pointerdown', () => this.restartGame());
-
-        // Botón "Reclamar premios"
-        const claimButton = this.add.text(
-            this.scale.width / 2,
-            restartButton.y + restartButton.height + buttonSpacing,
-            'RECLAMAR PREMIOS',
-            {
-                fontSize: '13px',
-                fontFamily: '"Press Start 2P", monospace',
-                fill: '#FFF',
-                backgroundColor: '#0E4DF1',
-                padding: { x: 15, y: 8 }
-            }
-        )
-        .setOrigin(0.5)
-        .setInteractive({ useHandCursor: true })
-        .on('pointerdown', () => this.claimPrizes());
-
-        const radius = 12;
-        const rectWidth = claimButton.width + 10;
-        const rectHeight = claimButton.height + 6;
-        const rect = this.add.graphics();
-        rect.fillStyle(0x0E4DF1, 1);
-        rect.fillRoundedRect(
-            claimButton.x - rectWidth / 2,
-            claimButton.y - rectHeight / 2,
-            rectWidth,
-            rectHeight,
-            radius
-        );
-        rect.setDepth(claimButton.depth - 1);
-        claimButton.setDepth(rect.depth + 1);
-    }
-
-    restartGame() {
-        this.scene.start('MainScene');
-        // El botón de pausa (pause-btn) se mostrará automáticamente al recrearse MainScene
-    }
-
-    claimPrizes() {
-        window.location.href = 'premios.html';
-        const pauseButton = document.querySelector('.pause-btn');
-        if (pauseButton) {
-            pauseButton.classList.add('hidden');
-        }
-    }
-}
-
-const config = {
-    type: Phaser.AUTO,
-    width: 360,
-    height: 480,
-    backgroundColor: '#87CEEB',
-    physics: {
-        default: 'arcade',
-        arcade: {
-            gravity: { y: 1000 },
-            debug: false
-        }
-    },
-    scene: [MainScene, GameOverScene], // AÑADE GameOverScene AQUÍ
-    scale: {
-        mode: Phaser.Scale.FIT,
-        autoCenter: Phaser.Scale.CENTER_BOTH
-    },
-    parent: 'game-container',
-    render: {
-        // webgl: {
-        //     antialias: true,
-        //     multiTexture: true
-        // }
-    }
-};
-
-new Phaser.Game(config);
+export default MainScene; 
