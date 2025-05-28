@@ -1,5 +1,3 @@
-// js/MainScene.js
-
 class MainScene extends Phaser.Scene {
     constructor() {
         super('MainScene');
@@ -132,10 +130,9 @@ class MainScene extends Phaser.Scene {
             volume: 0.50,
         });
 
-        // ¡Añade esto para inicializar el sonido 'end'!
         this.endSound = this.sound.add('end', {
             loop: false,
-            volume: 0.75, // Ajusta el volumen a tu gusto
+            volume: 0.75,
         });
     }
 
@@ -345,7 +342,6 @@ class MainScene extends Phaser.Scene {
             this.starSound.stop();
         }
 
-        // ¡Reproducir el sonido de Game Over aquí!
         if (this.endSound && !this.endSound.isPlaying) {
             this.endSound.play();
         }

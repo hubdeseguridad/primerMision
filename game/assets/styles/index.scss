@@ -1,7 +1,7 @@
 @import 'variables';
 
 body {
-    background-image: url('../img/index/fondo.svg');
+    background-image: url('../../assets/img/Index/FONDO.svg');
     background-size: calc(100% / 3) cover;
     background-repeat: repeat-x;
     background-position: center;
@@ -28,66 +28,6 @@ main {
         text-transform: uppercase;
     }
 
-    form {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        margin-top: 20px;
-    }
-
-    .star_input {
-        height: 40px;
-        width: 288px;
-        border-radius: 12px;
-        border-color: 1px solid #87A9FC;
-        font-family: $font-text;
-        font-size: 14px;
-        font-weight: 500;
-        padding: 10px;
-
-        &::placeholder {
-            color: #5F8DFC;
-        }
-    }
-
-    .star_btn {
-        border-radius: 12px;
-        border-color: 1px solid $primary-color;
-        width: 287px;
-        height: 48px;
-        background: linear-gradient(90deg, #0E4DF1 0%, #2A67FB 100%);
-        color: #F8FAFE;
-        cursor: pointer;
-        font-family: $font-text;
-        font-weight: 700;
-        font-size: 15px;
-        transition: transform 0.2s;
-
-        &:hover {
-            animation: pulse 0.6s infinite;
-        }
-
-        &:active {
-            background: linear-gradient(90deg, #ff0000 0%, #ff4d4d 100%);
-        }
-    }
-
-    @keyframes pulse {
-        0% {
-            transform: scale(1);
-        }
-
-        50% {
-            transform: scale(1.08);
-        }
-
-        100% {
-            transform: scale(1);
-        }
-    }
-
     .footer_container {
         display: flex;
         flex-direction: column;
@@ -103,13 +43,7 @@ main {
             text-decoration: none;
         }
 
-        .hubito {
-            position: absolute;
-            right: 35%;
-            z-index: -10;
-            width: 57px;
-            height: 92px;
-        }
+        
     }
 }
 
@@ -150,7 +84,7 @@ main {
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgba(0,0,0,0.7);
+    background-color: rgba(0, 0, 0, 0.7);
     justify-content: center;
     align-items: center;
 }
@@ -164,7 +98,7 @@ main {
     max-width: 600px;
     border-radius: 10px;
     position: relative;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     animation-name: animatetop;
     animation-duration: 0.4s;
 
@@ -231,7 +165,98 @@ main {
     }
 }
 
-@keyframes animatetop {
-    from {top: -300px; opacity: 0}
-    to {top: 0; opacity: 1}
+// Formularios de Mailchimp
+
+#mc_embed_shell {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+
+    form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+
+        input[type="email"],
+        input[type="text"] {
+            height: 40px;
+            width: 288px;
+            border-radius: 12px;
+            border-color: 1px solid #87A9FC;
+            font-family: $font-text;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 10px;
+            margin-bottom: 10px;
+
+            &::placeholder {
+                color: #5F8DFC;
+            }
+        }
+
+        .button {
+            border-radius: 12px;
+            border-color: 1px solid $primary-color;
+            width: 100%;
+            height: 48px;
+            background: linear-gradient(90deg, #0E4DF1 0%, #2A67FB 100%);
+            color: #F8FAFE;
+            cursor: pointer;
+            font-family: $font-text;
+            font-weight: 700;
+            font-size: 15px;
+            transition: transform 0.2s;
+
+            &:hover {
+                animation: pulse 0.6s infinite;
+            }
+
+            &:active {
+                background: linear-gradient(90deg, #ff0000 0%, #ff4d4d 100%);
+            }
+        }
+
+        #mce-responses{
+            background-color: #0E4DF1;
+            color: #F8FAFE;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.08);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes animatetop {
+            from {
+                top: -300px;
+                opacity: 0
+            }
+
+            to {
+                top: 0;
+                opacity: 1
+            }
+        }
+    }
+
+    .hubito {
+            position: absolute;
+            right: 35%;
+            z-index: -10;
+            width: 77px;
+            height: 112px;
+        }
 }

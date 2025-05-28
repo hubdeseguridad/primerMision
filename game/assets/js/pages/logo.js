@@ -1,7 +1,7 @@
 const gif = document.getElementById('star_img');
 const audio = new Audio('assets/sounds/logo.mp3');
 
-const interval = 15000;
+const interval = 10000;
 
 function playGifAndSound() {
     const currentSrc = gif.src;

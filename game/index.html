@@ -5,14 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Primera Misión</title>
-    <link rel="icon" type="image/png" href="assets/img/icon.svg">
-    
+    <link rel="icon" type="image/png" href="../src/img/icon.svg">
+
     <link rel="stylesheet" href="assets/styles/index.css">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Mono&display=swap" rel="stylesheet"> </head>
-    
-    <script src="assets/js/pages/logo.js"></script>
-    <script src="assets/js/pages/tutorialPopup.js"></script> 
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Mono&display=swap" rel="stylesheet">
+</head>
+
+<script src="assets/js/pages/logo.js"></script>
+<script src="assets/js/pages/tutorialPopup.js"></script>
 </head>
 
 <body>
@@ -25,30 +26,87 @@
 
         <div class="premios_container">
             <div class="premios">
-                <img class="premios_image" src="assets/img/Index/LIBRO.svg" alt="Manual">
+                <img class="premios_image" src="../src/img/LIBRO.svg" alt="Manual">
                 <p class="premios_text">Manual + Curso</p>
             </div>
 
             <div class="premios">
-                <img class="premios_image" src="assets/img/Index/CUPÓN.svg" alt="Cupón">
+                <img class="premios_image" src="../src/img/CUPÓN.svg" alt="Cupón">
                 <p class="premios_text">Cupón de $999</p>
             </div>
 
             <div class="premios">
-                <img class="premios_image" src="assets/img/Index/MONEDA.svg" alt="Descuento">
+                <img class="premios_image" src="../src/img/MONEDA.svg" alt="Descuento">
                 <p class="premios_text">Descuento del 10%</p>
             </div>
         </div>
 
-        <form
-            onsubmit="event.preventDefault(); if(document.getElementById('name').value.trim() !== '') { window.location.href='game.html'; }">
-            <input class="star_input" type="text" placeholder="Escribe tu nombre" id="name" required>
-            <button class="star_btn" type="submit">Empezar</button>
-        </form>
+        <div id="mc_embed_shell">
+            <!-- <link href="//cdn-images.mailchimp.com/embedcode/classic-061523.css" rel="stylesheet" type="text/css"> -->
+
+            <div id="mc_embed_signup">
+                <form
+                    action="https://elhubdeseguridad.us22.list-manage.com/subscribe/post?u=c1eb156cb0042578a6572242b&amp;id=aa9be5f552&amp;f_id=00f3dee1f0"
+                    method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate"
+                    target="_blank">
+                    <div id="mc_embed_signup_scroll">
+
+                        <div class="mc-field-group">
+                            <input type="email" name="EMAIL" class="required email" id="mce-EMAIL" required="" value=""
+                                placeholder="Dirección de correo electrónico*">
+                        </div>
+
+                        <div class="mc-field-group">
+                            <input type="text" name="FNAME" class="required text" id="mce-FNAME" required="" value=""
+                                placeholder="Nombre completo*">
+                        </div>
+
+                        <div class="mc-field-group">
+                            <input type="text" name="PHONE" class="REQ_CSS" id="mce-PHONE" value=""
+                                placeholder="Número telefónico">
+                        </div>
+
+
+                        <div id="mce-responses" class="clear">
+                            <div class="response" id="mce-error-response" style="display: none;"></div>
+                            <div class="response" id="mce-success-response" style="display: none;"></div>
+                        </div>
+
+                        <div aria-hidden="true" style="position: absolute; left: -5000px;">
+                            <input type="text" name="b_c1eb156cb0042578a6572242b_aa9be5f552" tabindex="-1" value="">
+                        </div>
+
+                        <div class="clear">
+                            <input type="submit" name="subscribe" id="mc-embedded-subscribe" class="button"
+                                value="Subscribe">
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+
+            <script type="text/javascript" src="//s3.amazonaws.com/downloads.mailchimp.com/js/mc-validate.js"></script>
+            <script type="text/javascript">
+                (function ($) {
+                    window.fnames = new Array();
+                    window.ftypes = new Array();
+                    fnames[0] = 'EMAIL';
+                    ftypes[0] = 'email';
+                    fnames[2] = 'FNAME';
+                    ftypes[2] = 'text';
+                    fnames[3] = 'PHONE';
+                    ftypes[3] = 'phone';
+                    fnames[1] = 'LNAME';
+                    ftypes[1] = 'text';
+                }(jQuery)); var $mcj = jQuery.noConflict(true);
+            </script>
+
+            
+            <img class="hubito" src="assets/img/hubitojump.png" alt="hubito jump">
+        </div>
 
         <div class="footer_container">
             <a href="#" id="openTutorial">Ver Tutorial</a>
-            <img class="hubito" src="assets/img/hubitojump.png" alt="hubito jump">
             <p class="credits">EHDS 2025 © Créditos</p>
         </div>
     </main>
@@ -61,27 +119,29 @@
 
             <div class="instructions_container">
                 <p class="instructions_text">Usa las teclas ← → o el touch de la pantalla para moverte.</p>
-                <img src="assets/img/hubitojump.png" alt="movimiento" id="movimiento">
+                <img src="../game/assets/img/Index/SALTANDO.svg" alt="movimiento" id="movimiento">
             </div>
 
             <div class="instructions_container">
-                <img src="assets/img/Index/LADRILLO.svg" alt="ladrillo" id="ladrillo">
+                <img src="../game/assets/img/Index/LADRILLO.svg" alt="ladrillo" id="ladrillo">
                 <p class="instructions_text">No pierdas de vista los ladrillos que caen del cielo, ¡esquívalos!</p>
             </div>
 
             <div class="instructions_container">
-                <p class="instructions_text">Manténte protegido con los items que puedes recoger al avanzar en tu partida.</p>
-                <img src="assets/img/Index/CASCO.svg" alt="casco" id="casco">
+                <p class="instructions_text">Manténte protegido con los items que puedes recoger al avanzar en tu
+                    partida.</p>
+                <img src="../game/assets/img/Index/CASCO.svg" alt="casco" id="casco">
             </div>
 
             <div class="instructions_container">
-                <img src="assets/img/Index/BOTITA.svg" alt="botas" id="botas">
+                <img src="../game/assets/img/Index/BOTITA.svg" alt="botas" id="botas">
                 <p class="instructions_text">¡Estas botas te darán un super salto para llegar más alto!.</p>
             </div>
 
             <div class="instructions_container">
-                <p class="instructions_text">Recoge estos objetos para obtener puntos extra y aumentar tu puntuación.</p>
-                <img src="assets/img/Index/DC3.svg" alt="DC-3" id="DC-3">
+                <p class="instructions_text">Recoge estos objetos para obtener puntos extra y aumentar tu puntuación.
+                </p>
+                <img src="../game/assets/img/Index/DC3.svg" alt="DC-3" id="DC-3">
             </div>
         </div>
     </div>
