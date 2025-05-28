@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Capa_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1080 1080">
+  <!-- Generator: Adobe Illustrator 29.5.1, SVG Export Plug-In . SVG Version: 2.1.0 Build 141)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: #0a2bfe;
+      }
+
+      .st1 {
+        fill: #1a183c;
+      }
+    </style>
+  </defs>
+  <path class="st1" d="M1080,180v90h-45v45h45v90h-45v45h45v90h-45v45h45v90h-45v45h45v90h-45v45h45v90H0v-90h45v-45H0v-90h45v-45H0v-90h45v-45H0v-90h45v-45H0v-90h45v-45H0v-90h1080ZM855,225H90v675h765v-45h90v45h45V225h-45v45h-90v-45Z"/>
+  <path class="st0" d="M855,225v45h90v-45h45v675h-45v-45h-90v45H90V225h765ZM765,270H135v585h630V270ZM945,315h-90v90h90v-90ZM945,450h-90v90h90v-90ZM945,585h-90v90h90v-90ZM945,720h-90v90h90v-90Z"/>
+  <path class="st1" d="M765,270v585H135V270h630ZM720,315H180v495h540v-495Z"/>
+  <rect class="st1" x="855" y="315" width="90" height="90"/>
+  <rect class="st1" x="855" y="450" width="90" height="90"/>
+  <rect class="st1" x="855" y="585" width="90" height="90"/>
+  <rect class="st1" x="855" y="720" width="90" height="90"/>
+  <path class="st0" d="M720,315v495H180v-495h540ZM360,360h-90v45h-45v90h45v45h90v-45h45v-90h-45v-45ZM675,360h-90v45h-45v45h-45v45h-45v45h-45v45h-45v45h-45v45h-45v45h-45v45h90v-45h45v-45h45v-45h45v-45h45v-45h45v-45h45v-45h45v-45h45v-45ZM630,585h-90v45h-45v90h45v45h90v-45h45v-90h-45v-45Z"/>
+  <polygon class="st1" points="675 360 675 405 630 405 630 450 585 450 585 495 540 495 540 540 495 540 495 585 450 585 450 630 405 630 405 675 360 675 360 720 315 720 315 765 225 765 225 720 270 720 270 675 315 675 315 630 360 630 360 585 405 585 405 540 450 540 450 495 495 495 495 450 540 450 540 405 585 405 585 360 675 360"/>
+  <polygon class="st1" points="360 360 360 405 405 405 405 495 360 495 360 540 270 540 270 495 225 495 225 405 270 405 270 360 360 360"/>
+  <polygon class="st1" points="630 585 630 630 675 630 675 720 630 720 630 765 540 765 540 720 495 720 495 630 540 630 540 585 630 585"/>
+</svg>

@@ -1,0 +1,103 @@
+@use 'variables' as v;
+
+h1, h2, h3, h4, h5, h6, .title {
+    font-family: v.$font-titles;
+    color: v.$darkblue-4;
+}
+p, description {
+    font-family: v.$font-blocks;
+    font-weight: 500;
+    color: v.$darkblue-1;
+}
+a {
+    text-decoration: none;
+}
+
+.btn {
+    display: block;
+    font-family: v.$font-ui;
+    font-size: 1.375rem;
+    text-transform: uppercase;
+    text-align: center;
+    color: #fff;
+    background: v.$primary-3;
+    padding: 1.25rem 2.5rem 1.25rem 2.5rem;
+    margin: 16px 5px;
+    border: 0;
+    box-shadow:
+        0px -5px v.$darkblue-5, // arriba
+        5px 0px v.$darkblue-5, // derecha
+        0px 5px v.$darkblue-5, // abajo
+        -5px 0px v.$darkblue-5, // izquierda
+        0px 10px v.$lightblue-3, // sombra
+        5px 5px v.$lightblue-3, // sombra
+        -5px 5px v.$lightblue-3, // sombra
+        inset 0px 5px v.$primary-2; // sombra interna
+    cursor: pointer;
+
+    &:hover {
+        background: v.$primary-4;
+    }
+    &:active {
+        transform: translateY(5px);
+        box-shadow:
+            0px 5px v.$darkblue-5,
+            0px -5px v.$darkblue-5,
+            5px 0px v.$darkblue-5,
+            -5px 0px v.$darkblue-5,
+            inset 0px 5px v.$primary-5;
+    }
+
+    &.secondary {
+        background: v.$bg-light-1;
+        color: v.$primary-3;
+        box-shadow:
+            0px -5px v.$lightblue-5, // arriba
+            5px 0px v.$lightblue-5, // derecha
+            0px 5px v.$lightblue-5, // abajo
+            -5px 0px v.$lightblue-5, // izquierda
+            0px 10px v.$lightblue-3, // sombra
+            5px 5px v.$lightblue-3, // sombra
+            -5px 5px v.$lightblue-3, // sombra
+            inset 0px 5px v.$lightblue-2; // sombra interna
+        &:hover {
+            background: v.$bg-light-2;
+            box-shadow:
+                0px -5px v.$lightblue-5, // arriba
+                5px 0px v.$lightblue-5, // derecha
+                0px 5px v.$lightblue-5, // abajo
+                -5px 0px v.$lightblue-5, // izquierda
+                0px 10px v.$lightblue-3, // sombra
+                5px 5px v.$lightblue-3, // sombra
+                -5px 5px v.$lightblue-3, // sombra
+                inset 0px 5px v.$lightblue-2; // sombra interna
+        }
+        &:active {
+            transform: translateY(5px);
+            box-shadow:
+                0px 5px v.$lightblue-5,
+                0px -5px v.$lightblue-5,
+                5px 0px v.$lightblue-5,
+                -5px 0px v.$lightblue-5,
+                inset 0px 5px v.$lightblue-2;
+        }
+    }
+
+    svg.icon {
+        width: 24px;
+	    height: 24px;
+
+        path {
+            fill: v.$lightblue-2;
+        }
+    }
+    svg.icon.secondary {
+        path {
+            fill: v.$primary-3;
+        }
+    }
+}
+
+section {
+    overflow: hidden;
+}

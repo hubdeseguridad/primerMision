@@ -1,90 +1,228 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="es-MX">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Primera Misión</title>
-    <link rel="icon" type="image/png" href="assets/img/icon.svg">
-    <link rel="stylesheet" href="assets/styles/index.css">
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Mono&display=swap" rel="stylesheet"> </head>
-    
-    <script src="assets/js/pages/logo.js"></script>
-    <script src="assets/js/pages/tutorialPopup.js"></script> 
+	<title>Brigadistas al Rescate - Primera Misión</title>
+	<link rel="icon" type="image/png" href="game/assets/img/icon.svg">
+
+	<link rel="stylesheet" href="./src/css/main.css">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&family=Jersey+10&family=Press+Start+2P&family=Tiny5&display=swap" rel="stylesheet">
 </head>
-
 <body>
+    <!-- SECCIÓN 1: Brigadistas en Acción -->
+	<section id="hero">
+		<div class="container">
 
-    <main>
-        <img class="star_img" src="assets/img/Index/Logo.gif" alt="Brigadistas En Acción" id="star_img">
-        <p class="star_text">Para comenzar el juego ingresa tu nombre y da clic en “Empezar”. ¡Mucha suerte salvando al
-            mundo!</p>
-        <h2>Premios</h2>
+			<!-- HERO: Logo -->
+			<div class="logo">
+				<img src="./src/img/logo.png" alt="">
+			</div>
 
-        <div class="premios_container">
-            <div class="premios">
-                <img class="premios_image" src="assets/img/Index/LIBRO.svg" alt="Manual">
-                <p class="premios_text">Manual + Curso</p>
-            </div>
+			<!-- HERO: Contenido -->
+			<div class="content">
+				<h1 class="title">Conviértete en el héroe que tu empresa necesita</h2>
+				<p class="description">Capacítate jugando y aprende sobre seguridad industrial.</p>
+			</div>
 
-            <div class="premios">
-                <img class="premios_image" src="assets/img/Index/CUPÓN.svg" alt="Cupón">
-                <p class="premios_text">Cupón de $999</p>
-            </div>
+			<!-- HERO: Botones -->
+			<div class="botones">
+				<a href="#premios" class="btn secondary">
+					<svg class="icon secondary" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M2 7H3V9H2V7Z" fill="#2A67FB"/>
+						<path d="M13 7H14V9H13V7Z" fill="#2A67FB"/>
+						<path d="M11 7H13V9H11V7Z" fill="#2A67FB"/>
+						<path d="M3 7H5V9H3V7Z" fill="#2A67FB"/>
+						<path d="M3 7H4V6H3V7Z" fill="#2A67FB"/>
+						<path d="M3 10H6V9H3V10Z" fill="#2A67FB"/>
+						<path d="M4 6H9V5H4V6Z" fill="#2A67FB"/>
+						<path d="M4 11H5V10H4V11Z" fill="#2A67FB"/>
+						<path d="M6 10H7V9H6V10Z" fill="#2A67FB"/>
+						<path d="M6 7H7V6H6V7Z" fill="#2A67FB"/>
+						<path d="M9 7H10V6H9V7Z" fill="#2A67FB"/>
+						<path d="M9 10H10V9H9V10Z" fill="#2A67FB"/>
+						<path d="M5 5H6V4H5V5Z" fill="#2A67FB"/>
+						<path d="M5 12H6V11H5V12Z" fill="#2A67FB"/>
+						<path d="M10 5H11V4H10V5Z" fill="#2A67FB"/>
+						<path d="M10 12H11V11H10V12Z" fill="#2A67FB"/>
+						<path d="M9 6H12V5H9V6Z" fill="#2A67FB"/>
+						<path d="M7 11H12V10H7V11Z" fill="#2A67FB"/>
+						<path d="M12 7H13V6H12V7Z" fill="#2A67FB"/>
+						<path d="M12 10H13V9H12V10Z" fill="#2A67FB"/>
+						<path d="M10 9H12V6H10V9Z" fill="#2A67FB"/>
+						<path d="M10 10H12V9H10V10Z" fill="#2A67FB"/>
+						<path d="M6 9H4V6H6V9Z" fill="#2A67FB"/>
+						<path d="M5 11H7V10H5V11Z" fill="#2A67FB"/>
+						<path d="M6 5H10V4H6V5Z" fill="#2A67FB"/>
+						<path d="M6 12H10V11H6V12Z" fill="#2A67FB"/>
+						<path d="M6 4H10V3H6V4Z" fill="#2A67FB"/>
+						<path d="M6 13H10V12H6V13Z" fill="#2A67FB"/>
+					</svg>
+						
+					Ver premios
+				</a>
+				<a href="#play" class="btn primary">
+					<svg class="icon" width="16" height="16" viewBox="0 0 16 16" fill="red" xmlns="http://www.w3.org/2000/svg">
+						<path d="M6 12H7V3H6V12Z" fill="#2A67FB"/>
+						<path d="M7 11H8V10H7V11Z" fill="#2A67FB"/>
+						<path d="M6 12H7V11H6V12Z" fill="#2A67FB"/>
+						<path d="M8 10H9V9H8V10Z" fill="#2A67FB"/>
+						<path d="M9 9H10V8H9V9Z" fill="#2A67FB"/>
+						<path d="M6 8H11V7H6V8Z" fill="#2A67FB"/>
+						<path d="M9 9H10V6H9V9Z" fill="#2A67FB"/>
+						<path d="M8 10H9V5H8V10Z" fill="#2A67FB"/>
+						<path d="M7 10H8V4H7V10Z" fill="#2A67FB"/>
+						<path d="M6 4H7V3H6V4Z" fill="#2A67FB"/>
+					</svg>
+					Conviértete en un héroe
+				</a>
+			</div>
 
-            <div class="premios">
-                <img class="premios_image" src="assets/img/Index/MONEDA.svg" alt="Descuento">
-                <p class="premios_text">Descuento del 10%</p>
-            </div>
-        </div>
+			<!-- HERO: Video -->
+			<div class="video">
+				<iframe width="560" height="315" src="https://www.youtube.com/embed/wn0IyvGBeUI?si=xcetYINnR3X9t3xz" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+			</div>
 
-        <form
-            onsubmit="event.preventDefault(); if(document.getElementById('name').value.trim() !== '') { window.location.href='game.html'; }">
-            <input class="star_input" type="text" placeholder="Escribe tu nombre" id="name" required>
-            <button class="star_btn" type="submit">Empezar</button>
-        </form>
+		</div>
+	</section>
 
-        <div class="footer_container">
-            <a href="#" id="openTutorial">Ver Tutorial</a>
-            <img class="hubito" src="assets/img/hubitojump.png" alt="hubito jump">
-            <p class="credits">EHDS 2025 © Créditos</p>
-        </div>
-    </main>
+	<!-- SECCIÓN 2: Habilidades del brigadista -->
+	<section id="skills">
+		<div class="container">
 
-    <div class="tutorial-popup" id="tutorialPopup">
-        <div class="popup-content">
-            <span class="close-button" id="closeTutorial">&times;</span>
-            <h1 class="tutorial_title">Tutorial</h1>
-            <p class="tutorial_text">Tu guía para prevenir accidentes durante la partida (ykwim) ;)</p>
+			<!-- SKILLS: The Title -->
+			<div class="the-title">
+				<h2 class="title">Habilidades del brigadista</h2>
+			</div>
 
-            <div class="instructions_container">
-                <p class="instructions_text">Usa las teclas ← → o el touch de la pantalla para moverte.</p>
-                <img src="assets/img/hubitojump.png" alt="movimiento" id="movimiento">
-            </div>
+			<!-- SKILLS: The Content -->
+			<div class="the-content">
+				<div class="card-skill">
+					<img src="./src/img/i--powerup_boot.png" alt="" class="image">
+					<p class="description">Saber responder ante cualquier tipo de emergencia</p>
+				</div>
+				<div class="card-skill">
+					<img src="./src/img/i--powerup_case.png" alt="" class="image">
+					<p class="description">Realizar simulacros periódicos y capacitación del personal</p>
+				</div>
+				<div class="card-skill">
+					<img src="./src/img/i--powerup_dc3.png" alt="" class="image">
+					<p class="description">Registrar y actualizar el programa ante la autoridad correspondiente</p>
+				</div>
+			</div>
 
-            <div class="instructions_container">
-                <img src="assets/img/Index/LADRILLO.svg" alt="ladrillo" id="ladrillo">
-                <p class="instructions_text">No pierdas de vista los ladrillos que caen del cielo, ¡esquívalos!</p>
-            </div>
+			<!-- SKILLS: The CTA -->
+			<div class="the-cta">
+				<p class="description">¡Esta es tu primer misión!</p>
+				<a href="#" class="btn primary">Conviértete en un héroe</a>
+			</div>
+		</div>
+	</section>
 
-            <div class="instructions_container">
-                <p class="instructions_text">Manténte protegido con los items que puedes recoger al avanzar en tu partida.</p>
-                <img src="assets/img/Index/CASCO.svg" alt="casco" id="casco">
-            </div>
+	<!-- SECCIÓN 3: Premios -->
+	<section id="rewards">
+		<div class="container">
+			<!-- PREMIOS: The title -->
+			<div class="the-title">
+				<h2 class="title">Premios</h2>
+			</div>
+			<!-- PREMIOS: Hubito -->
+			<div class="hubito">
+				<img src="./src/img/pattern--corner-bg.png" alt="" class="pattern-lt">
+				<img src="./src/img/pattern--corner-bg.png" alt="" class="pattern-lb">
+				<img src="./src/img/pattern--corner-bg.png" alt="" class="pattern-rt">
+				<img src="./src/img/pattern--corner-bg.png" alt="" class="pattern-rb">
+				<h3 class="title">Ayuda Hubito a completar el juego</h3>
+				<p class="description">Conviértete en un brigadista respaldado. ¿Estás listo para ser un profesional de la prevención?</p>
+				<img src="./src/img/hubito.png" alt="" class="img">
+				<p class="description">La seguridad también se entrena. ¡Aprende jugando!</p>
+				<a href="game/index.html" class="btn primary onDark">Juega ahora</a>
+			</div>
+			<!-- PREMIOS: The Content -->
+			<div class="the-content">
+				<img src="./src/img/pattern--corner-bw.png" alt="" class="pattern-lt">
+				<img src="./src/img/pattern--corner-bw.png" alt="" class="pattern-lb">
+				<img src="./src/img/pattern--corner-bw.png" alt="" class="pattern-rt">
+				<img src="./src/img/pattern--corner-bw.png" alt="" class="pattern-rb">
+				<h3 class="title">Brigadista, puedes ganar todo esto.</h3>
+				<p class="description"><b>Tercer lugar</b>. Una capacitación de regalo + manual de curso.</p>
+				<p class="description"><b>Segundo lugar</b>. El regalo del tercer lugar + descuento de $999 por los 4 cursos de brigadistas.</p>
+				<p class="description"><b>Primer lugar</b>. Todo lo anterior + 10% de descuento en cualquiera de los cursos que desees.</p>
+				<img src="./src/img/podio.png" alt="" class="image">
+			</div>
 
-            <div class="instructions_container">
-                <img src="assets/img/Index/BOTITA.svg" alt="botas" id="botas">
-                <p class="instructions_text">¡Estas botas te darán un super salto para llegar más alto!.</p>
-            </div>
+		</div>
+	</section>
 
-            <div class="instructions_container">
-                <p class="instructions_text">Recoge estos objetos para obtener puntos extra y aumentar tu puntuación.</p>
-                <img src="assets/img/Index/DC3.svg" alt="DC-3" id="DC-3">
-            </div>
-        </div>
-    </div>
+
+	<!-- SECCIÓN 4: Nuestros cursos -->
+	<section id="courses">
+		<div class="container">
+			<!-- COURSES: The Title -->
+			<div class="the-title">
+				<h2 class="title">Nuestros cursos</h2>
+			</div>
+
+			<!-- COURSES: The Content -->
+			<div class="the-content">
+				<div class="course-item">
+					<a href="#" class="image--link">
+						<img src="./src/img/H003PABIB.png" alt="" class="cover">
+					</a>
+					<span class="tag">Seguridad Industrial</span>
+					<a href="#" class="title--link">
+						<h3 class="title">Curso Equipo de Protección Personal con Constancia DC-3</h3>
+					</a>
+					<a href="#" class="author--link">
+						<p class="author">Por Laura Herrera</p>
+					</a>
+				</div>
+				<div class="course-item">
+					<a href="#" class="image--link">
+						<img src="./src/img/H003PABIB.png" alt="" class="cover">
+					</a>
+					<span class="tag">Seguridad Industrial</span>
+					<a href="#" class="title--link">
+						<h3 class="title">Curso Equipo de Protección Personal con Constancia DC-3</h3>
+					</a>
+					<a href="#" class="author--link">
+						<p class="author">Por Laura Herrera</p>
+					</a>
+				</div>
+				<div class="course-item">
+					<a href="#" class="image--link">
+						<img src="./src/img/H003PABIB.png" alt="" class="cover">
+					</a>
+					<span class="tag">Seguridad Industrial</span>
+					<a href="#" class="title--link">
+						<h3 class="title">Curso Equipo de Protección Personal con Constancia DC-3</h3>
+					</a>
+					<a href="#" class="author--link">
+						<p class="author">Por Laura Herrera</p>
+					</a>
+				</div>
+				<div class="course-item">
+					<a href="#" class="image--link">
+						<img src="./src/img/H003PABIB.png" alt="" class="cover">
+					</a>
+					<span class="tag">Seguridad Industrial</span>
+					<a href="#" class="title--link">
+						<h3 class="title">Curso Equipo de Protección Personal con Constancia DC-3</h3>
+					</a>
+					<a href="#" class="author--link">
+						<p class="author">Por Laura Herrera</p>
+					</a>
+				</div>
+			</div>
+
+			<!-- COURSES: The title -->
+			<div class="cta">
+				<a href="#" class="btn primary">Certifícate con los líderes</a>
+			</div>
+		</div>
+	</section>
 
 </body>
-
 </html>

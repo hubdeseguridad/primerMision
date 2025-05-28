@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Primera Misión</title>
+    <link rel="icon" type="image/png" href="assets/img/icon.svg">
+    
+    <link rel="stylesheet" href="assets/styles/index.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Mono&display=swap" rel="stylesheet"> </head>
+    
+    <script src="assets/js/pages/logo.js"></script>
+    <script src="assets/js/pages/tutorialPopup.js"></script> 
+</head>
+
+<body>
+
+    <main>
+        <img class="star_img" src="assets/img/Index/Logo.gif" alt="Brigadistas En Acción" id="star_img">
+        <p class="star_text">Para comenzar el juego ingresa tu nombre y da clic en “Empezar”. ¡Mucha suerte salvando al
+            mundo!</p>
+        <h2>Premios</h2>
+
+        <div class="premios_container">
+            <div class="premios">
+                <img class="premios_image" src="assets/img/Index/LIBRO.svg" alt="Manual">
+                <p class="premios_text">Manual + Curso</p>
+            </div>
+
+            <div class="premios">
+                <img class="premios_image" src="assets/img/Index/CUPÓN.svg" alt="Cupón">
+                <p class="premios_text">Cupón de $999</p>
+            </div>
+
+            <div class="premios">
+                <img class="premios_image" src="assets/img/Index/MONEDA.svg" alt="Descuento">
+                <p class="premios_text">Descuento del 10%</p>
+            </div>
+        </div>
+
+        <form
+            onsubmit="event.preventDefault(); if(document.getElementById('name').value.trim() !== '') { window.location.href='game.html'; }">
+            <input class="star_input" type="text" placeholder="Escribe tu nombre" id="name" required>
+            <button class="star_btn" type="submit">Empezar</button>
+        </form>
+
+        <div class="footer_container">
+            <a href="#" id="openTutorial">Ver Tutorial</a>
+            <img class="hubito" src="assets/img/hubitojump.png" alt="hubito jump">
+            <p class="credits">EHDS 2025 © Créditos</p>
+        </div>
+    </main>
+
+    <div class="tutorial-popup" id="tutorialPopup">
+        <div class="popup-content">
+            <span class="close-button" id="closeTutorial">&times;</span>
+            <h1 class="tutorial_title">Tutorial</h1>
+            <p class="tutorial_text">Tu guía para prevenir accidentes durante la partida (ykwim) ;)</p>
+
+            <div class="instructions_container">
+                <p class="instructions_text">Usa las teclas ← → o el touch de la pantalla para moverte.</p>
+                <img src="assets/img/hubitojump.png" alt="movimiento" id="movimiento">
+            </div>
+
+            <div class="instructions_container">
+                <img src="assets/img/Index/LADRILLO.svg" alt="ladrillo" id="ladrillo">
+                <p class="instructions_text">No pierdas de vista los ladrillos que caen del cielo, ¡esquívalos!</p>
+            </div>
+
+            <div class="instructions_container">
+                <p class="instructions_text">Manténte protegido con los items que puedes recoger al avanzar en tu partida.</p>
+                <img src="assets/img/Index/CASCO.svg" alt="casco" id="casco">
+            </div>
+
+            <div class="instructions_container">
+                <img src="assets/img/Index/BOTITA.svg" alt="botas" id="botas">
+                <p class="instructions_text">¡Estas botas te darán un super salto para llegar más alto!.</p>
+            </div>
+
+            <div class="instructions_container">
+                <p class="instructions_text">Recoge estos objetos para obtener puntos extra y aumentar tu puntuación.</p>
+                <img src="assets/img/Index/DC3.svg" alt="DC-3" id="DC-3">
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

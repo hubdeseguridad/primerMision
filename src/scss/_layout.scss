@@ -1,0 +1,430 @@
+@use 'variables' as v;
+@use 'base' as b;
+
+.container {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 64px 20px 40px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    @include b.responsive(v.$breakpoint-mobile) {
+        max-width: 640px;
+        padding: 40px;
+    }
+    @include b.responsive(v.$breakpoint-tablet) {
+        max-width: 1120px;
+    }
+    @include b.responsive(v.$breakpoint-desktop) {
+        max-width: 1440px;
+        padding: 120px;
+    }
+}
+
+// Titles on website
+section {
+    h1.title {
+        text-transform: uppercase;
+        font-size: 2.5rem;
+        line-height: 1;
+    }
+    h2.title {
+        text-transform: uppercase;
+        font-size: 2.25rem;
+        line-height: 1;
+
+        @include b.responsive(v.$breakpoint-desktop) {
+            font-size: 3rem;
+        }
+    }
+    h3.title {
+        text-transform: uppercase;
+        font-size: 2.125rem;
+        line-height: 1;
+
+        @include b.responsive(v.$breakpoint-desktop) {
+            font-size: 2.25rem;
+        }
+    }
+
+    
+}
+
+#hero .container {
+    display: grid;
+    grid-template-areas:
+        "logo"
+        "contenido"
+        "video"
+        "botones";
+    grid-template-columns: 1fr;
+    gap: 40px;
+    
+    .logo      { grid-area: logo; }
+    .contenido { grid-area: contenido; }
+    .botones   { grid-area: botones; }
+    .video     { grid-area: video; }
+
+    @include b.responsive(v.$breakpoint-desktop) {
+        grid-template-areas:
+            "logo      logo"
+            "contenido video"
+            "botones   video";
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+#hero {
+    background: white;
+
+    .logo {
+        justify-self: center;
+        align-self: center;
+
+        img {
+            max-width: 280px;
+
+            @include b.responsive(v.$breakpoint-tablet) {
+                max-width: 480px;
+            }
+        }
+    }
+
+    .botones {
+        display: flex;
+        flex-direction: column;
+    }
+    .video {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+
+        iframe {
+            width: 100%;
+            height: 100%;
+        }
+    }
+
+    .content {
+        max-width: 400px;
+        margin: auto;
+
+        .title {
+            text-align: center;
+
+            @include b.responsive(v.$breakpoint-tablet) {
+                font-size: 3.5rem;
+            }
+        }
+        .description {
+            text-align: center;
+            font-size: 1.125rem;
+            font-weight: 500;
+            margin-top: 1rem;
+
+            @include b.responsive(v.$breakpoint-tablet) {
+                font-size: 1.375rem;
+            }
+        }
+
+        @include b.responsive(v.$breakpoint-tablet) {
+            max-width: 560px;
+        }
+    }
+}
+
+#skills .container {
+    display: grid;
+    grid-template-areas:
+        "title"
+        "content"
+        "cta";
+    grid-template-columns: 1fr;
+    gap: 40px;
+
+    .the-title   { grid-area: title; }
+    .the-content { grid-area: content; }
+    .the-cta     { grid-area: cta; }
+
+}
+#skills {
+    .the-title {
+        text-align: center;
+    }
+    .the-content {
+        display: grid;
+        grid-template-columns: auto;
+        grid-template-rows: 1fr 1fr 1fr;
+        gap: 40px;
+
+        .card-skill {
+            display: flex;
+            padding: 24px;
+            background: v.$lightblue-2;
+            align-items: center;
+            gap: 16px;
+            box-shadow:
+                0px 5px v.$lightblue-5,
+                0px -5px v.$lightblue-5,
+                5px 0px v.$lightblue-5,
+                -5px 0px v.$lightblue-5;
+    
+            img { width: 64px;}
+
+            @include b.responsive(v.$breakpoint-tablet) {
+                flex-direction: column;
+
+                img { width: 124px; }
+            }
+        }
+
+        @include b.responsive(v.$breakpoint-tablet) {
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-rows: auto;
+        }
+    }
+    .the-cta {
+        .description {
+            font-size: 1.25rem;
+            font-weight: 700;
+            text-align: center;
+            margin: 24px 0 24px;
+        }
+    }
+}
+
+#rewards .container {
+    display: grid;
+    grid-template-areas:
+        "title"
+        "hubito"
+        "content";
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    justify-items: center;
+    gap: 40px;
+    
+    .the-title { grid-area: title; }
+    .hubito    { grid-area: hubito; }
+    .the-content   { grid-area: content; }
+
+    @include b.responsive(v.$breakpoint-tablet) {
+        max-width: 640px;
+    }
+    @include b.responsive(v.$breakpoint-desktop) {
+        max-width: 1440px;
+        grid-template-areas:
+            "title title title"
+            "hubito content content";
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+}
+
+#rewards {
+    background: v.$primary-3;
+
+    .the-title {
+        .title {
+            color: v.$bg-light-1;
+        }
+    }
+    .hubito {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background: v.$lightblue-2;
+        position: relative;
+        padding: 48px 32px;
+
+        .title {
+            text-align: center;
+        }
+
+        img.img {
+            height: 240px;
+            
+        }
+
+        .pattern-lt {
+            width: 48px;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+        .pattern-lb {
+            width: 48px;
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            transform: rotate(-90deg);
+        }
+        .pattern-rt {
+            width: 48px;
+            position: absolute;
+            right: 0;
+            top: 0;
+            transform: rotate(90deg);
+        }
+        .pattern-rb {
+            width: 48px;
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            transform: rotate(180deg);
+        }
+    }
+    .the-content {
+        background: v.$bg-light-1;
+        padding: 48px 32px;
+        position: relative;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+
+        .description,
+        .title {
+            max-width: 580px;
+        }
+        .title {
+            margin-bottom: 16px;
+            color: v.$primary-4;
+        }
+
+        .pattern-lt {
+            width: 48px;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+        .pattern-lb {
+            width: 48px;
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            transform: rotate(-90deg);
+        }
+        .pattern-rt {
+            width: 48px;
+            position: absolute;
+            right: 0;
+            top: 0;
+            transform: rotate(90deg);
+        }
+        .pattern-rb {
+            width: 48px;
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            transform: rotate(180deg);
+        }
+        .image {
+            width: 100%;
+            max-width: 640px;
+            margin-top: 24px;
+        }
+    }
+}
+
+// COURSES
+#courses .container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+#courses {
+    background: v.$darkblue-5;
+
+    .the-title .title { color: v.$lightblue-1; }
+    .the-content {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+
+        @include b.responsive(v.$breakpoint-tablet) {
+            display: grid;
+            grid-template-columns: auto auto;
+            grid-template-rows: auto;
+            gap: 24px;
+        }
+        @include b.responsive(v.$breakpoint-desktop) {
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+        }
+
+        .course-item {
+            display: grid;
+            grid-template-areas:
+                "cover tag"
+                "cover title"
+                "cover author";
+            grid-template-columns: auto 1fr;
+            column-gap: 16px;
+            margin: 12px 0;
+            width: 100%;
+
+            .image--link  { grid-area: cover; }
+            .title--link  { grid-area: title; }
+            .author--link { grid-area: author; }
+
+            .image--link {
+                width: 80px;
+                height: 80px;
+                overflow: hidden;
+                display: flex;
+                justify-content: center;
+                border: 2px solid v.$primary-3;
+
+                .cover {
+                    height: 100%;
+                    transform: scale(1.2);
+                }
+
+                @include b.responsive(v.$breakpoint-tablet) {
+                    width: 100%;
+                    height: auto;
+                    aspect-ratio: 16 / 9;
+                }
+            }
+            .tag {
+                color: v.$primary-3;
+                font-family: v.$font-blocks;
+                text-transform: uppercase;
+                font-size: 0.75rem;
+                font-weight: 700;
+            }
+            .title--link h3 {
+                font-size: 1.5rem;
+                color: v.$lightblue-3;
+                margin-bottom: 0.125rem;
+            }
+            .author--link .author {
+                font-size: 1rem;
+            }
+
+            @include b.responsive(v.$breakpoint-tablet) {
+                grid-template-areas:
+                    "cover"
+                    "tag"
+                    "title"
+                    "author";
+                grid-template-columns: 1fr;
+                margin: 0;
+            }
+        }
+        
+        @include b.responsive(v.$breakpoint-tablet) {
+            .course-item:nth-child(2n+1) {
+                margin: 0 0 0 auto;
+            }
+            .course-item {
+                max-width: 320px;
+            }
+        }
+
+        
+    }
+}

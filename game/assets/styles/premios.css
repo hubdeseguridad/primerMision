@@ -1,0 +1,91 @@
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: "Fira Mono", monospace;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  gap: 10px;
+  max-width: 850px;
+}
+
+.credits {
+  font-weight: 700;
+  font-size: 10px;
+  color: #2A67FB;
+}
+
+body {
+  background-color: #1A1A3D;
+  font-family: "Poppins", sans-serif;
+}
+body h1 {
+  color: #F2F4FB;
+  font-family: "Dela Gothic One", sans-serif;
+  font-size: 32px;
+}
+body h3 {
+  color: #ABB2D9;
+  font-weight: bold;
+  font-size: 14px;
+}
+body p {
+  color: #D0D7F0;
+  font-size: 24px;
+}
+
+#mc_embed_shell {
+  background-color: #282D58;
+  width: 100%;
+  color: #fff;
+}
+#mc_embed_shell label {
+  font-weight: bold;
+  font-size: 15px;
+}
+#mc_embed_shell .asterisk {
+  color: #ff196c;
+}
+#mc_embed_shell input[type=text],
+#mc_embed_shell input[type=email] {
+  background-color: #1A1A3D;
+  border: 1px solid #5E6C97;
+  color: #fff;
+  padding: 10px;
+  border-radius: 4px;
+  font-size: 15px;
+  width: 752px;
+  height: 40px;
+}
+#mc_embed_shell input[type=text]:focus,
+#mc_embed_shell input[type=email]:focus {
+  outline: none;
+  border-color: #2A67FB;
+  background-color: #282D58;
+}
+#mc_embed_shell .datepart {
+  background-color: #1A1A3D;
+  border: 1px solid #5E6C97;
+  padding: 10px;
+  border-radius: 4px;
+  font-size: 15px;
+}
+#mc_embed_shell input[type=submit] {
+  background-color: #2A67FB;
+  color: #fff;
+  border: none;
+  text-align: center;
+  padding: 10px 20px;
+  padding-bottom: 40px;
+  border-radius: 4px;
+  font-size: 15px;
+  cursor: pointer;
+  width: 195px;
+}/*# sourceMappingURL=premios.css.map */

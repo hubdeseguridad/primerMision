@@ -1,0 +1,79 @@
+@import 'variables';
+
+body {
+    background-color: #1A1A3D;
+    font-family: 'Poppins', sans-serif;
+
+    h1 {
+        color: #F2F4FB;
+        font-family: 'Dela Gothic One', sans-serif;
+        font-size: 32px;
+    }
+
+    h3 {
+        color: #ABB2D9;
+        font-weight: bold;
+        font-size: 14px;
+    }
+
+    p {
+        color: #D0D7F0;
+        font-size: 24px;
+    }
+}
+
+
+#mc_embed_shell {
+    background-color: #282D58;
+    width: 100%;
+    color: #fff;
+
+    label {
+        font-weight: bold;
+        font-size: 15px;
+    }
+
+    .asterisk{
+        color: #ff196c;
+    }
+
+    input[type="text"],
+    input[type="email"] {
+        background-color: #1A1A3D;
+        border: 1px solid #5E6C97;
+        color: #fff;
+        padding: 10px;
+        border-radius: 4px;
+        font-size: 15px;
+        width: 752px;
+        height: 40px;
+
+        &:focus {
+            outline: none;
+            border-color: #2A67FB;
+            background-color: #282D58;
+        }
+    }
+
+    .datepart{
+        background-color: #1A1A3D;
+        border: 1px solid #5E6C97;
+        padding: 10px;
+        border-radius: 4px;
+        font-size: 15px;
+    }
+
+    input[type="submit"] {
+        background-color: #2A67FB;
+        color: #fff;
+        border: none;
+        text-align: center;
+        padding: 10px 20px;
+        padding-bottom: 40px;
+        border-radius: 4px;
+        font-size: 15px;
+        cursor: pointer;
+        width: 195px;
+    }
+
+}
