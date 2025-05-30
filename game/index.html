@@ -42,7 +42,6 @@
         </div>
 
         <div id="mc_embed_shell">
-            <!-- <link href="//cdn-images.mailchimp.com/embedcode/classic-061523.css" rel="stylesheet" type="text/css"> -->
 
             <div id="mc_embed_signup">
                 <form
@@ -51,21 +50,22 @@
                     target="_blank">
                     <div id="mc_embed_signup_scroll">
 
+                        <div class="indicates-required">
+                            <span class="asterisk">*</span> indica que es obligatorio
+                        </div>
+
+
                         <div class="mc-field-group">
-                            <input type="email" name="EMAIL" class="required email" id="mce-EMAIL" required="" value=""
-                                placeholder="Dirección de correo electrónico*">
+                            <input type="email" name="EMAIL" class="required email" id="mce-EMAIL" required="" value="" placeholder="Dirección de correo electrónico *">
                         </div>
 
                         <div class="mc-field-group">
-                            <input type="text" name="FNAME" class="required text" id="mce-FNAME" required="" value=""
-                                placeholder="Nombre completo*">
+                            <input type="text" name="FNAME" class="required text" id="mce-FNAME" required="" value="" placeholder="Nombre completo">
                         </div>
 
                         <div class="mc-field-group">
-                            <input type="text" name="PHONE" class="REQ_CSS" id="mce-PHONE" value=""
-                                placeholder="Número telefónico">
+                            <input type="text" name="PHONE" class="REQ_CSS" id="mce-PHONE" value="" placeholder="Número telefónico">
                         </div>
-
 
                         <div id="mce-responses" class="clear">
                             <div class="response" id="mce-error-response" style="display: none;"></div>
@@ -80,10 +80,11 @@
                             <input type="submit" name="subscribe" id="mc-embedded-subscribe" class="button"
                                 value="Subscribe">
                         </div>
-
                     </div>
+
                 </form>
             </div>
+
 
             <script type="text/javascript" src="//s3.amazonaws.com/downloads.mailchimp.com/js/mc-validate.js"></script>
             <script type="text/javascript">
@@ -96,12 +97,17 @@
                     ftypes[2] = 'text';
                     fnames[3] = 'PHONE';
                     ftypes[3] = 'phone';
+                    fnames[6] = 'BIRTHDAY';
+                    ftypes[6] = 'date';
+                    fnames[5] = 'BUSINESS';
+                    ftypes[5] = 'text';
                     fnames[1] = 'LNAME';
                     ftypes[1] = 'text';
+                    fnames[4] = 'OCCUPATION';
+                    ftypes[4] = 'text';
                 }(jQuery)); var $mcj = jQuery.noConflict(true);
             </script>
 
-            
             <img class="hubito" src="assets/img/hubitojump.png" alt="hubito jump">
         </div>
 

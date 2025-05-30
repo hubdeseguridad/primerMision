@@ -180,6 +180,18 @@ main {
         align-items: center;
         justify-content: center;
         width: 100%;
+        
+        .indicates-required{
+            font-family: $font-text;
+            font-size: 10px;
+            font-weight: 500;
+            margin-bottom: 10px;
+            text-align: end;
+
+            span{
+                color: #ff4d4d;
+            }
+        }
 
         input[type="email"],
         input[type="text"] {

@@ -13,6 +13,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  background-image: url("../img/banner.png");
 }
 
 #game-container {

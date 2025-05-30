@@ -181,6 +181,16 @@ main .footer_container a {
   justify-content: center;
   width: 100%;
 }
+#mc_embed_shell form .indicates-required {
+  font-family: "Fira Mono", monospace;
+  font-size: 10px;
+  font-weight: 500;
+  margin-bottom: 10px;
+  text-align: end;
+}
+#mc_embed_shell form .indicates-required span {
+  color: #ff4d4d;
+}
 #mc_embed_shell form input[type=email],
 #mc_embed_shell form input[type=text] {
   height: 40px;
