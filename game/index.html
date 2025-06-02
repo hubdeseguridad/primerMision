@@ -56,15 +56,18 @@
 
 
                         <div class="mc-field-group">
-                            <input type="email" name="EMAIL" class="required email" id="mce-EMAIL" required="" value="" placeholder="Dirección de correo electrónico *">
+                            <input type="email" name="EMAIL" class="required email" id="mce-EMAIL" required="" value=""
+                                placeholder="Dirección de correo electrónico *">
                         </div>
 
                         <div class="mc-field-group">
-                            <input type="text" name="FNAME" class="required text" id="mce-FNAME" required="" value="" placeholder="Nombre completo">
+                            <input type="text" name="FNAME" class="required text" id="mce-FNAME" required="" value=""
+                                placeholder="Nombre completo">
                         </div>
 
                         <div class="mc-field-group">
-                            <input type="text" name="PHONE" class="REQ_CSS" id="mce-PHONE" value="" placeholder="Número telefónico">
+                            <input type="text" name="PHONE" class="REQ_CSS" id="mce-PHONE" value=""
+                                placeholder="Número telefónico">
                         </div>
 
                         <div id="mce-responses" class="clear">
@@ -109,6 +112,18 @@
             </script>
 
             <img class="hubito" src="assets/img/hubitojump.png" alt="hubito jump">
+
+            <div id="loading-overlay" style="display: none;">
+                <img src="assets/img/Hubito.gif" alt="Hubito-Cargando">
+
+                <div class="loading-content">
+                    <p>Cargando<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></p>
+                    <div id="progress-bar-container">
+                        <div id="progress-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <div class="footer_container">
@@ -152,6 +167,7 @@
         </div>
     </div>
 
+    <script src="assets/js/pages/form.js"></script>
 </body>
 
 </html>
