@@ -316,19 +316,17 @@ main .footer_container a {
 }
 #mc_embed_shell #loading-overlay img {
   width: 200px;
-  height: 250px;
+  height: 300px;
 }
-
-#progress-bar-container {
+#mc_embed_shell #loading-overlay #progress-bar-container {
   width: 350px;
   height: 45px;
   background-color: #5E6C97;
   overflow: hidden;
   margin-top: 15px;
-  box-shadow: 0px -5px #2A67FB, 5px 0px #2A67FB, 0px 5px #2A67FB, -5px 0px #2A67FB;
+  box-shadow: 0px -5px #2A67FB, 5px 0px #2A67FB, 0px 5px #2A67FB, -5px 0px #2A67FB, inset 0px 5px #293350, inset 0px -5px #293350, inset 5px 0px #293350, inset -5px 0px #293350;
 }
-
-#progress-bar-fill {
+#mc_embed_shell #loading-overlay #progress-bar-fill {
   width: 0%;
   height: 100%;
   background-color: #2A67FB;

@@ -335,30 +335,33 @@ main {
 
         img {
             width: 200px;
-            height: 250px;
+            height: 300px;
+        }
+
+        #progress-bar-container {
+            width: 350px;
+            height: 45px;
+            background-color: #5E6C97;
+            overflow: hidden;
+            margin-top: 15px;
+
+            box-shadow:
+                0px -5px $primary-3,
+                5px 0px $primary-3,
+                0px 5px $primary-3,
+                -5px 0px $primary-3,
+                // sombra interna
+                inset 0px 5px $darkblue-3,
+                inset 0px -5px $darkblue-3,
+                inset 5px 0px $darkblue-3,
+                inset -5px 0px $darkblue-3;
+        }
+
+        #progress-bar-fill {
+            width: 0%;
+            height: 100%;
+            background-color: $primary-3;
+            transition: width 0.1s linear;
         }
     }
-}
-
-
-
-#progress-bar-container {
-    width: 350px;
-    height: 45px;
-    background-color: #5E6C97;
-    overflow: hidden;
-    margin-top: 15px;
-
-    box-shadow:
-        0px -5px $primary-3, 
-        5px 0px $primary-3,
-        0px 5px $primary-3,
-        -5px 0px $primary-3,
-}
-
-#progress-bar-fill {
-    width: 0%;
-    height: 100%;
-    background-color: #2A67FB;
-    transition: width 0.1s linear;
 }
