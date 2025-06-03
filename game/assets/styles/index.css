@@ -25,27 +25,33 @@ main {
 
 body {
   background-image: url("../../assets/img/Index/FONDO.svg");
-  background-size: 33.3333333333% cover;
   background-repeat: repeat-x;
   background-position: center;
 }
 
+main {
+  margin: 100px;
+}
 main .star_img {
   width: 650px;
   z-index: 99;
 }
-main .star_text {
-  font-family: "Press Start 2P", monospace;
-  color: #2A67FB;
-  font-size: 12px;
-  font-weight: 400;
+main .star_title {
+  font-family: "Jersey 10", sans-serif;
+  font-size: 40px;
+  font-weight: 500;
   text-align: center;
+  color: #ffffff;
+  background-color: #083AB5;
 }
-main h2 {
-  color: #2A67FB;
-  font-size: 18px;
-  font-weight: 700;
+main .star_text {
+  font-family: "Jersey 10", sans-serif;
+  font-size: 40px;
+  font-weight: 500;
+  text-align: center;
+  color: #ffffff;
   text-transform: uppercase;
+  letter-spacing: 3px;
 }
 main .footer_container {
   display: flex;
@@ -60,30 +66,6 @@ main .footer_container a {
   font-weight: 700;
   font-size: 13px;
   text-decoration: none;
-}
-
-.premios_container {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  margin-top: 20px;
-}
-.premios_container .premios {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin: 0 10px;
-}
-.premios_container .premios .premios_image {
-  width: 60px;
-  height: 60px;
-}
-.premios_container .premios .premios_text {
-  font-size: 11px;
-  font-weight: 700;
-  color: #083AB5;
 }
 
 .tutorial-popup {
@@ -182,34 +164,34 @@ main .footer_container a {
   justify-content: center;
   width: 100%;
 }
-#mc_embed_shell form .indicates-required {
-  font-family: "Fira Mono", monospace;
-  font-size: 10px;
-  font-weight: 500;
-  margin-bottom: 10px;
-  text-align: end;
-}
-#mc_embed_shell form .indicates-required span {
-  color: #ff4d4d;
-}
-#mc_embed_shell form input[type=email],
-#mc_embed_shell form input[type=text] {
-  height: 40px;
-  width: 288px;
-  border-radius: 12px;
-  border-color: 1px solid #87A9FC;
-  font-family: "Fira Mono", monospace;
-  font-size: 14px;
-  font-weight: 500;
+#mc_embed_shell form .mc-field-group {
   padding: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
+  width: 580px;
+  height: 60px;
 }
-#mc_embed_shell form input[type=email]::-moz-placeholder, #mc_embed_shell form input[type=text]::-moz-placeholder {
-  color: #5F8DFC;
+#mc_embed_shell form #mce-FNAME,
+#mc_embed_shell form #mce-EMAIL,
+#mc_embed_shell form .phonepart {
+  width: 100%;
+  font-size: 28px;
+  font-family: "Jersey 10", sans-serif;
+  height: 100%;
+  box-shadow: 0px -5px rgba(171, 178, 217, 0.7), 5px 0px rgba(171, 178, 217, 0.7), 0px 5px rgba(171, 178, 217, 0.7), -5px 0px rgba(171, 178, 217, 0.7);
 }
-#mc_embed_shell form input[type=email]::placeholder,
-#mc_embed_shell form input[type=text]::placeholder {
-  color: #5F8DFC;
+#mc_embed_shell form #mce-FNAME::-moz-placeholder, #mc_embed_shell form #mce-EMAIL::-moz-placeholder, #mc_embed_shell form .phonepart::-moz-placeholder {
+  color: #2A67FB;
+}
+#mc_embed_shell form #mce-FNAME::placeholder,
+#mc_embed_shell form #mce-EMAIL::placeholder,
+#mc_embed_shell form .phonepart::placeholder {
+  color: #2A67FB;
+}
+#mc_embed_shell form .phonepart {
+  width: 25%;
+  margin-right: 5%;
+  justify-content: center;
+  align-items: center;
 }
 #mc_embed_shell form .button {
   border-radius: 12px;
@@ -331,4 +313,11 @@ main .footer_container a {
   height: 100%;
   background-color: #2A67FB;
   transition: width 0.1s linear;
+}
+
+@media (max-width: 700px) {
+  #mc_embed_shell #loading-overlay {
+    display: flex;
+    flex-direction: column;
+  }
 }/*# sourceMappingURL=index.css.map */

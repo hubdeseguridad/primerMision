@@ -2,30 +2,36 @@
 
 body {
     background-image: url('../../assets/img/Index/FONDO.svg');
-    background-size: calc(100% / 3) cover;
     background-repeat: repeat-x;
     background-position: center;
 }
 
 main {
+
+    margin: 100px;
+
     .star_img {
         width: 650px;
         z-index: 99;
     }
 
-    .star_text {
-        font-family: $font-title;
-        color: $secondary-color;
-        font-size: 12px;
-        font-weight: 400;
+    .star_title {
+        font-family: 'Jersey 10', sans-serif;
+        font-size: 40px;
+        font-weight: 500;
         text-align: center;
+        color: #ffffff;
+        background-color: $primary-5;
     }
 
-    h2 {
-        color: $secondary-color;
-        font-size: 18px;
-        font-weight: 700;
+    .star_text {
+        font-family: 'Jersey 10', sans-serif;
+        font-size: 40px;
+        font-weight: 500;
+        text-align: center;
+        color: #ffffff;
         text-transform: uppercase;
+        letter-spacing: 3px;
     }
 
     .footer_container {
@@ -44,33 +50,6 @@ main {
         }
 
 
-    }
-}
-
-.premios_container {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    margin-top: 20px;
-
-    .premios {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        margin: 0 10px;
-
-        .premios_image {
-            width: 60px;
-            height: 60px;
-        }
-
-        .premios_text {
-            font-size: 11px;
-            font-weight: 700;
-            color: $primary-color;
-        }
     }
 }
 
@@ -180,33 +159,39 @@ main {
         justify-content: center;
         width: 100%;
 
-        .indicates-required {
-            font-family: $font-text;
-            font-size: 10px;
-            font-weight: 500;
-            margin-bottom: 10px;
-            text-align: end;
+        .mc-field-group {
+            padding: 10px;
+            margin-bottom: 20px;
+            width: 580px;
+            height: 60px;
+        }
+        
+        #mce-FNAME,
+        #mce-EMAIL,
+        .phonepart
+        {
+            width: 100%;
+            font-size: 28px;
+            font-family: 'Jersey 10', sans-serif;
+            height: 100%;
 
-            span {
-                color: #ff4d4d;
+
+            box-shadow:
+                0px -5px rgba(171, 178, 217, 0.7),
+                5px 0px rgba(171, 178, 217, 0.7),
+                0px 5px rgba(171, 178, 217, 0.7),
+                -5px 0px rgba(171, 178, 217, 0.7);
+
+            &::placeholder {
+                color: $primary-3;
             }
         }
 
-        input[type="email"],
-        input[type="text"] {
-            height: 40px;
-            width: 288px;
-            border-radius: 12px;
-            border-color: 1px solid #87A9FC;
-            font-family: $font-text;
-            font-size: 14px;
-            font-weight: 500;
-            padding: 10px;
-            margin-bottom: 10px;
-
-            &::placeholder {
-                color: #5F8DFC;
-            }
+        .phonepart{
+            width: 25%;
+            margin-right: 5%;
+            justify-content: center;
+            align-items: center
         }
 
         .button {
@@ -362,6 +347,15 @@ main {
             height: 100%;
             background-color: $primary-3;
             transition: width 0.1s linear;
+        }
+    }
+}
+
+@media (max-width: 700px) {
+    #mc_embed_shell {
+        #loading-overlay {
+            display: flex;
+            flex-direction: column;
         }
     }
 }
