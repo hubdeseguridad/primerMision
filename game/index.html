@@ -31,36 +31,39 @@
                 <form
                     action="https://elhubdeseguridad.us22.list-manage.com/subscribe/post?u=c1eb156cb0042578a6572242b&amp;id=aa9be5f552&amp;f_id=00f3dee1f0"
                     method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate"
-                    target="_blank">
+                    target="_blank" autocomplete="off">
                     <div id="mc_embed_signup_scroll">
 
                         <div class="mc-field-group">
-                            <input type="text" name="FNAME" class="required text" id="mce-FNAME" required="" value=""
+                            <input type="text" name="FNAME" class="required text" id="mce-FNAME" required value=""
                                 placeholder="Escribe tu nombre...">
                         </div>
 
                         <div class="mc-field-group">
-                            <input type="email" name="EMAIL" class="required email" id="mce-EMAIL" required="" value=""
+                            <input type="email" name="EMAIL" class="required email" id="mce-EMAIL" required value=""
                                 placeholder="Escribe tu correo electrónico...">
                         </div>
 
                         <div class="mc-field-group">
+                            <label for="">Escribe tu numero de telefono (XXX)-XXX-XXXX</label>
 
                             <div class="phonefield phonefield-us">
                                 <span class="phonearea">
-                                    <input class="phonepart REQ_CSS" pattern="[0-9]" id="mce-PHONE-area"
-                                        name="PHONE[area]" maxlength="3" size="3" type="text" value="" placeholder="xxx">
+                                    <input class="phonepart REQ_CSS" pattern="[0-9]{3}" id="mce-PHONE-area"
+                                        name="PHONE[area]" maxlength="3" size="3" type="text" value=""
+                                        placeholder="xxx" inputmode="numeric" autocomplete="off">
                                 </span>
                                 <span class="phonedetail1">
-                                    <input class="phonepart REQ_CSS" pattern="[0-9]" id="mce-PHONE-detail1"
-                                        name="PHONE[detail1]" maxlength="3" size="3" type="text" value="" placeholder="xxx">
-                                </span> 
+                                    <input class="phonepart REQ_CSS" pattern="[0-9]{3}" id="mce-PHONE-detail1"
+                                        name="PHONE[detail1]" maxlength="3" size="3" type="text" value=""
+                                        placeholder="xxx" inputmode="numeric" autocomplete="off">
+                                </span>
                                 <span class="phonedetail2">
-                                    <input class="phonepart REQ_CSS" pattern="[0-9]" id="mce-PHONE-detail2"
-                                        name="PHONE[detail2]" maxlength="4" size="4" type="text" value="" placeholder="xxxx ">
+                                    <input class="phonepart REQ_CSS" pattern="[0-9]{4}" id="mce-PHONE-detail2"
+                                        name="PHONE[detail2]" maxlength="4" size="4" type="text" value=""
+                                        placeholder="xxxx" inputmode="numeric" autocomplete="off">
                                 </span>
                             </div>
-
                         </div>
 
                         <div id="mce-responses" class="clear">
@@ -72,41 +75,22 @@
                             <input type="text" name="b_c1eb156cb0042578a6572242b_aa9be5f552" tabindex="-1" value="">
                         </div>
 
-                        <div class="clear">
-                            <input type="submit" name="subscribe" id="mc-embedded-subscribe" class="button"
-                                value="Subscribe">
+                        <div class="clear" style="position:relative;">
+                            <button type="submit" name="subscribe" id="mc-embedded-subscribe" class="button" disabled>Subscribe</button>
+                            <div id="form-warning" style="display: none;">
+                                Llene los datos correctamente
+                            </div>
                         </div>
 
                     </div>
                 </form>
             </div>
 
-
             <script type="text/javascript" src="//s3.amazonaws.com/downloads.mailchimp.com/js/mc-validate.js"></script>
-            <script type="text/javascript">
-                (function ($) {
-                    window.fnames = new Array();
-                    window.ftypes = new Array();
-                    fnames[0] = 'EMAIL';
-                    ftypes[0] = 'email';
-                    fnames[2] = 'FNAME';
-                    ftypes[2] = 'text';
-                    fnames[3] = 'PHONE';
-                    ftypes[3] = 'phone';
-                    fnames[1] = 'LNAME';
-                    ftypes[1] = 'text';
-                    fnames[4] = 'OCCUPATION';
-                    ftypes[4] = 'text';
-                    fnames[5] = 'BUSINESS';
-                    ftypes[5] = 'text';
-                    fnames[6] = 'BIRTHDAY';
-                    ftypes[6] = 'date';
-                }(jQuery)); var $mcj = jQuery.noConflict(true);
-            </script>
+
 
             <div id="loading-overlay" style="display: none;">
                 <img src="assets/img/Hubito.gif" alt="Hubito-Cargando">
-
                 <div class="loading-content">
                     <p>Cargando<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></p>
                     <div id="progress-bar-container">
@@ -114,9 +98,8 @@
                     </div>
                 </div>
             </div>
-
-
         </div>
+
 
         <div class="footer_container">
             <a href="#" id="openTutorial">Ver Tutorial</a>
@@ -142,7 +125,8 @@
 
             <div class="instructions_container">
                 <img src="../game/assets/img/Index/CASCO.svg" alt="casco" id="casco">
-                <p class="instructions_text">Manténte protegido con los items que puedes recoger al avanzar en tu partida.</p>
+                <p class="instructions_text">Manténte protegido con los items que puedes recoger al avanzar en tu
+                    partida.</p>
             </div>
 
             <div class="instructions_container">
@@ -152,7 +136,8 @@
 
             <div class="instructions_container">
                 <img src="../game/assets/img/Index/DC3.svg" alt="DC-3" id="DC-3">
-                <p class="instructions_text">Recoge estos objetos para obtener puntos extra y aumentar tu puntuación. </p>
+                <p class="instructions_text">Recoge estos objetos para obtener puntos extra y aumentar tu puntuación.
+                </p>
             </div>
         </div>
     </div>

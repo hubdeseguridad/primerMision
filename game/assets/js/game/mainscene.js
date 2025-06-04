@@ -181,9 +181,9 @@ class MainScene extends Phaser.Scene {
         const startY = 10;
 
         this.scoreIndicators = [
-            this.add.rectangle(startX, startY, squareSize, squareSize, 0x808080).setOrigin(0, 0).setScrollFactor(0).setDepth(10),
-            this.add.rectangle(startX + squareSize + padding, startY, squareSize, squareSize, 0x808080).setOrigin(0, 0).setScrollFactor(0).setDepth(10),
-            this.add.rectangle(startX + 2 * (squareSize + padding), startY, squareSize, squareSize, 0x808080).setOrigin(0, 0).setScrollFactor(0).setDepth(10)
+            this.add.rectangle(startX, startY, squareSize, squareSize, 0x808080).setOrigin(0, 0).setScrollFactor(0).setDepth(10).setVisible(false),
+            this.add.rectangle(startX + squareSize + padding, startY, squareSize, squareSize, 0x808080).setOrigin(0, 0).setScrollFactor(0).setDepth(10).setVisible(false),
+            this.add.rectangle(startX + 2 * (squareSize + padding), startY, squareSize, squareSize, 0x808080).setOrigin(0, 0).setScrollFactor(0).setDepth(10).setVisible(false)
         ];
 
         this.scoreThresholds = [25, 50, 100];
@@ -503,13 +503,13 @@ class MainScene extends Phaser.Scene {
         return platform;
     }
 
-    getPlatformColor(type) {
+   /*  getPlatformColor(type) {
         switch (type) {
             case 'static': return 0x00aa00;
             case 'bomb': return 0x8b0000;
             default: return 0x00aa00;
         }
-    }
+    } */
 
     spawnPlatform(y) {
         const platformType = this.platformTypes[Phaser.Math.Between(0, this.platformTypes.length - 1)];

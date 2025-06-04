@@ -176,6 +176,12 @@ main {
             margin-bottom: 20px;
             width: 580px;
             height: 60px;
+
+            label{
+                font-family: $font-alt;
+                font-size: 28px;
+                color: $primary-3;
+            }
         }
 
         #mce-FNAME,
@@ -352,6 +358,21 @@ main {
             transition: width 0.1s linear;
         }
     }
+
+    #form-warning{ 
+        color:#fff; 
+        background:#e74c3c; 
+        border-radius:4px; 
+        padding:6px 10px; 
+        position:absolute; 
+        left:0; 
+        right:0; 
+        margin:auto; 
+        top:-36px; 
+        text-align:center; 
+        font-size:14px; 
+        z-index:20;
+    }
 }
 
 @media (max-width: 700px) {
@@ -410,19 +431,14 @@ main {
         }
     }
 
-
-
     .popup-content {
 
-    .instructions_container {
-        margin-bottom: 10px;
+        .instructions_container {
+            margin-bottom: 10px;
 
-        p {
-            margin-left: 10px;
+            p {
+                margin-left: 10px;
+            }
         }
     }
-}
-
-
-
 }

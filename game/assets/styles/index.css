@@ -182,6 +182,11 @@ main .footer_container p {
   width: 580px;
   height: 60px;
 }
+#mc_embed_shell form .mc-field-group label {
+  font-family: "Jersey 10", sans-serif;
+  font-size: 28px;
+  color: #2A67FB;
+}
 #mc_embed_shell form #mce-FNAME,
 #mc_embed_shell form #mce-EMAIL,
 #mc_embed_shell form .phonepart {
@@ -318,6 +323,20 @@ main .footer_container p {
   height: 100%;
   background-color: #2A67FB;
   transition: width 0.1s linear;
+}
+#mc_embed_shell #form-warning {
+  color: #fff;
+  background: #e74c3c;
+  border-radius: 4px;
+  padding: 6px 10px;
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin: auto;
+  top: -36px;
+  text-align: center;
+  font-size: 14px;
+  z-index: 20;
 }
 
 @media (max-width: 700px) {
