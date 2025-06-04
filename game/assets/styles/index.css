@@ -30,7 +30,7 @@ body {
 }
 
 main {
-  margin: 100px;
+  margin: 50px;
 }
 main .star_img {
   width: 650px;
@@ -62,10 +62,23 @@ main .footer_container {
   gap: 5px;
 }
 main .footer_container a {
-  color: #2A67FB;
-  font-weight: 700;
-  font-size: 13px;
+  color: #ffffff;
+  font-weight: 800;
+  position: relative;
   text-decoration: none;
+  font-size: 18px;
+}
+main .footer_container a::after {
+  content: "";
+  display: block;
+  height: 2px;
+  background: currentColor;
+  margin-top: 4px;
+  border-radius: 2px;
+  width: 100%;
+}
+main .footer_container p {
+  color: #ffffff;
 }
 
 .tutorial-popup {
@@ -83,6 +96,10 @@ main .footer_container a {
 }
 
 .popup-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   background-color: #F6F9FF;
   margin: auto;
   padding: 20px;
@@ -96,24 +113,25 @@ main .footer_container a {
   animation-duration: 0.4s;
 }
 .popup-content .tutorial_title {
-  font-weight: 700;
-  font-size: 18px;
-  color: #2A67FB;
+  font-weight: 500;
+  font-size: 40px;
+  font-family: "Jersey 10", sans-serif;
+  color: #0E4DF1;
   text-align: center;
 }
 .popup-content .tutorial_text {
   text-align: center;
-  font-weight: 500;
-  font-size: 14px;
-  color: #2A67FB;
+  font-weight: 600;
+  font-size: 20px;
+  color: #0E4DF1;
   margin-bottom: 20px;
+  font-family: "Fira Mono", monospace;
 }
 .popup-content .instructions_container {
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: space-between;
-  width: 100%;
+  width: 90%;
   margin-bottom: 15px;
 }
 .popup-content .instructions_container img {
@@ -123,17 +141,11 @@ main .footer_container a {
   flex-shrink: 0;
 }
 .popup-content .instructions_container p {
-  color: #2A67FB;
-  font-family: "Fira Mono", monospace;
-  font-size: 14px;
-  font-weight: 500;
+  color: #0E4DF1;
+  font-family: "Press Start 2P", monospace;
+  font-size: 11px;
   flex-grow: 1;
-}
-.popup-content .credits {
-  text-align: center;
-  margin-top: 20px;
-  font-size: 12px;
-  color: #2A67FB;
+  margin-left: 15px;
 }
 
 .close-button {
@@ -237,13 +249,6 @@ main .footer_container a {
     opacity: 1;
   }
 }
-#mc_embed_shell .hubito {
-  position: absolute;
-  right: 35%;
-  z-index: -10;
-  width: 77px;
-  height: 112px;
-}
 #mc_embed_shell #loading-overlay {
   position: fixed;
   top: 0;
@@ -316,8 +321,46 @@ main .footer_container a {
 }
 
 @media (max-width: 700px) {
+  main .star_img {
+    width: 320px;
+  }
+  main .star_title {
+    font-size: 24px;
+  }
+  main .star_text {
+    font-size: 24px;
+  }
+  main .footer_container a {
+    color: #083AB5;
+    font-size: 20px;
+  }
+  main .footer_container p {
+    color: #1A1A3D;
+    background-color: #ffffff;
+    font-size: 24px;
+    margin-top: 50px;
+  }
+  #mc_embed_shell form .mc-field-group {
+    width: 380px;
+    height: 50px;
+  }
+  #mc_embed_shell form #mce-FNAME,
+  #mc_embed_shell form #mce-EMAIL,
+  #mc_embed_shell form .phonepart {
+    width: 95%;
+  }
+  #mc_embed_shell form .phonepart {
+    width: 25%;
+    margin-right: 4%;
+  }
   #mc_embed_shell #loading-overlay {
     display: flex;
     flex-direction: column;
+  }
+  .popup-content .instructions_container {
+    margin-bottom: 10px;
+  }
+  .popup-content .instructions_container p {
+    margin-left: 10px;
   }
 }/*# sourceMappingURL=index.css.map */
