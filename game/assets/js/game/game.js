@@ -19,7 +19,10 @@ const config = {
         autoCenter: Phaser.Scale.CENTER_BOTH
     },
     parent: 'game-container',
-    render: {}
+    render: {
+        preserveDrawingBuffer: true,
+        alpha: true
+    }
 };
 
 new Phaser.Game(config);
