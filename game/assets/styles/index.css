@@ -340,7 +340,10 @@ main .footer_container p {
   z-index: 20;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 800px) {
+  main {
+    max-width: 380px;
+  }
   main .star_img {
     width: 320px;
   }

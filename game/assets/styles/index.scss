@@ -376,9 +376,10 @@ main {
     }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 800px) {
 
     main {
+        max-width: 380px;
         .star_img {
             width: 320px;
         }
@@ -434,8 +435,6 @@ main {
             display: flex;
             flex-direction: column;
         }
-
-
     }
 
     .popup-content {
