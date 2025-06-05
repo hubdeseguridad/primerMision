@@ -79,6 +79,7 @@ main .footer_container a::after {
 }
 main .footer_container p {
   color: #ffffff;
+  font-size: 14px;
 }
 
 .tutorial-popup {
@@ -339,7 +340,7 @@ main .footer_container p {
   z-index: 20;
 }
 
-@media (max-width: 700px) {
+@media (max-width: 900px) {
   main .star_img {
     width: 320px;
   }
@@ -371,6 +372,9 @@ main .footer_container p {
   #mc_embed_shell form .phonepart {
     width: 25%;
     margin-right: 4%;
+  }
+  #mc_embed_shell form .button {
+    margin-top: 40px;
   }
   #mc_embed_shell #loading-overlay {
     display: flex;

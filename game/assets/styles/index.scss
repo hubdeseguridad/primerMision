@@ -62,6 +62,7 @@ main {
 
         p {
             color: #ffffff;
+            font-size: 14px;
         }
     }
 }
@@ -375,7 +376,7 @@ main {
     }
 }
 
-@media (max-width: 700px) {
+@media (max-width: 900px) {
 
     main {
         .star_img {
@@ -423,12 +424,18 @@ main {
                 width: 25%;
                 margin-right: 4%;
             }
+
+            .button{
+                margin-top: 40px;
+            }
         }
 
         #loading-overlay {
             display: flex;
             flex-direction: column;
         }
+
+
     }
 
     .popup-content {
