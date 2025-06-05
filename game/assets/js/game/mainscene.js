@@ -21,11 +21,13 @@ class MainScene extends Phaser.Scene {
         this.specialObjectsGravity = 10;
         this.shieldGlowEffect = null;
         this.fallingWarningIndicator = null;
+        this.pickupWarningIndicator = null;
+
         this.timers = {
             damageObject: { elapsed: 0, interval: Phaser.Math.Between(8000, 12000), warningDuration: 1000 },
-            scoreBonus: { elapsed: 0, interval: 10000 },
-            shieldObject: { elapsed: 0, interval: 18000 },
-            bootsObject: { elapsed: 0, interval: 15000 },
+            scoreBonus: { elapsed: 0, interval: 10000, warningDuration: 800 },
+            shieldObject: { elapsed: 0, interval: 18000, warningDuration: 800 },
+            bootsObject: { elapsed: 0, interval: 15000, warningDuration: 800 },
             bootsEffect: { elapsed: 0, duration: 5000 }
         };
         this.jumpSound = null;
@@ -100,9 +102,10 @@ class MainScene extends Phaser.Scene {
         this.setupText();
         this.setupPlatforms();
         this.setupPlayer();
-        this.setupFallingObjects();
-        this.setupShieldObjects();
-        this.setupBootsObjects();
+        this.setupFallingObjects(); // Contendrá Ladrillos
+        this.setupDc3Objects();     // Contendrá DC3
+        this.setupShieldObjects();  // Contendrá Cascos
+        this.setupBootsObjects();   // Contendrá Botas
         this.setupCamera();
         this.setupCollisions();
         this.setupPauseButton();
@@ -258,9 +261,27 @@ class MainScene extends Phaser.Scene {
     }
 
     setupCollisions() {
+        // Colisión de jugador con objetos de daño (ladrillo)
+        // Usamos overlap para detectar la colisión y activar el efecto.
         this.physics.add.overlap(this.player, this.fallingObjects, this.handleFallingObjectCollision, null, this);
+
+        // MODIFICADO: Nueva colisión para que el jugador recoja los DC3 (score)
+        this.physics.add.overlap(this.player, this.dc3Objects, this.handleFallingObjectCollision, null, this);
+
+        // Recolección de objetos especiales (casco y botas) con el jugador
         this.physics.add.overlap(this.player, this.shieldObjects, this.handleShieldCollision, null, this);
         this.physics.add.overlap(this.player, this.bootsObjects, this.handleBootsCollision, null, this);
+
+        // Colisión de objetos especiales (casco y botas) con plataformas para que se queden en ellas.
+        this.physics.add.collider(this.shieldObjects, this.platforms);
+        this.physics.add.collider(this.bootsObjects, this.platforms);
+        
+        // Colisión de los DC3 (type 'score') con las plataformas para que se queden en ellas.
+        this.physics.add.collider(this.dc3Objects, this.platforms, (obj, plat) => {
+            obj.body.setVelocityY(0);
+            obj.body.allowGravity = false;
+            obj.body.setImmovable(true); 
+        });
     }
 
     setupPauseButton() {
@@ -305,11 +326,11 @@ class MainScene extends Phaser.Scene {
     }
 
     startGame() {
-        if (this.gameStarted) return; 
+        if (this.gameStarted) return;
 
         this.gameStarted = true;
 
-        this.startText.destroy(); 
+        this.startText.destroy();
         this.player.body.allowGravity = true;
         this.player.body.setVelocityY(this.originalPlayerJumpSpeed);
         this.player.setTexture('hubitojump');
@@ -452,11 +473,11 @@ class MainScene extends Phaser.Scene {
         this.platforms = this.physics.add.staticGroup();
         this.platformSpacing = 100;
         this.maxPlatforms = 15;
- 
-        const initialPlatformY = this.scale.height - 30; 
+
+        const initialPlatformY = this.scale.height - 30;
 
         for (let i = 0; i < 10; i++) {
-            const type = Math.random() < this.bombPlatformPercentage ? 'bomb' : 'static';
+            // Asegura que las plataformas iniciales sean estáticas para una base sólida
             this.createPlatform(Phaser.Math.Between(30, this.scale.width - 30), initialPlatformY - i * this.platformSpacing, 'static');
         }
 
@@ -503,7 +524,7 @@ class MainScene extends Phaser.Scene {
         return platform;
     }
 
-   /*  getPlatformColor(type) {
+   /* getPlatformColor(type) { // Esta función está comentada, no es usada actualmente para los tipos 'platform01' o 'platform02'
         switch (type) {
             case 'static': return 0x00aa00;
             case 'bomb': return 0x8b0000;
@@ -564,7 +585,10 @@ class MainScene extends Phaser.Scene {
         -----------------------
     */
     setupFallingObjects() {
-        this.fallingObjects = this.physics.add.group();
+        this.fallingObjects = this.physics.add.group(); // Este grupo contendrá Ladrillos.
+    }
+    setupDc3Objects() { // MODIFICADO: Inicialización del nuevo grupo para DC3
+        this.dc3Objects = this.physics.add.group();
     }
 
     setupShieldObjects() {
@@ -575,7 +599,7 @@ class MainScene extends Phaser.Scene {
         this.bootsObjects = this.physics.add.group();
     }
 
-    spawnFallingObject(type, color, velocityRange) {
+    spawnFallingObject(type, color, velocityRange) { // Original (brick, etc)
         if (!this.gameStarted || !this.player.getData('isAlive')) return;
         const x = Phaser.Math.Between(30, this.scale.width - 30);
         const y = this.cameras.main.scrollY - this.scale.height * 1.5;
@@ -597,9 +621,9 @@ class MainScene extends Phaser.Scene {
     spawnFallingDamageObject() {
         if (!this.gameStarted || !this.player.getData('isAlive')) return;
         const xPos = Phaser.Math.Between(30, this.scale.width - 30);
-        const yPos = this.cameras.main.scrollY - this.scale.height * 0.1;
+        const yNotif = this.cameras.main.scrollY + 50;
 
-        this.showDangerIndicator(xPos, yPos);
+        this.showDangerIndicator(xPos, yNotif);
 
         this.time.delayedCall(this.timers.damageObject.warningDuration, () => {
             if (!this.player.getData('isAlive')) return;
@@ -609,9 +633,8 @@ class MainScene extends Phaser.Scene {
             brick.setScale(1.3);
             brick.body.setCircle((brick.width * 2) / 20);
             brick.body.gravity.y = 1;
-
-            brick.setData('type', 'damage');
-            this.fallingObjects.add(brick);
+            brick.setData('type', 'damage'); 
+            this.fallingObjects.add(brick); // Se añade al grupo 'fallingObjects' (solo para ladrillos)
             brick.alias = 'Ladrillo';
         });
     }
@@ -639,65 +662,124 @@ class MainScene extends Phaser.Scene {
         });
     }
 
+    showPickupIndicator(x, y, warningDuration) {
+        if (this.pickupWarningIndicator) {
+            this.pickupWarningIndicator.destroy();
+        }
+        this.pickupWarningIndicator = this.add.graphics();
+        this.pickupWarningIndicator.fillStyle(0x00FF00, 0.8);
+        this.pickupWarningIndicator.fillCircle(x, y, 10);
+
+        this.tweens.add({
+            targets: this.pickupWarningIndicator,
+            alpha: { from: 0.8, to: 0.2 },
+            duration: 200,
+            ease: 'Sine.InOut',
+            yoyo: true,
+            repeat: Math.ceil(warningDuration / 400),
+            onComplete: () => {
+                this.pickupWarningIndicator?.destroy();
+                this.pickupWarningIndicator = null;
+            }
+        });
+    }
+
     spawnScoreBonusObject() {
         if (!this.gameStarted || !this.player.getData('isAlive')) return;
-        const x = Phaser.Math.Between(30, this.scale.width - 30);
-        const y = this.cameras.main.scrollY - this.scale.height * 1.5;
-        const scoreBonus = this.physics.add.sprite(x, y, 'dc3');
-        scoreBonus.setScale(0.5);
-        scoreBonus.body.setCircle((scoreBonus.width * 0.8) / 2);
-        scoreBonus.body.gravity.y = this.specialObjectsGravity;
-        scoreBonus.setData('type', 'score');
-        this.fallingObjects.add(scoreBonus);
-        scoreBonus.alias = 'DC3';
-        return scoreBonus;
+
+        const visiblePlatforms = this.platforms.getChildren().filter(p =>
+            p.y > this.cameras.main.scrollY && p.y < this.cameras.main.scrollY + this.scale.height * 0.7
+        );
+
+        if (visiblePlatforms.length > 0) {
+            const targetPlatform = Phaser.Utils.Array.GetRandom(visiblePlatforms);
+            const xPos = targetPlatform.x;
+            const yPos = targetPlatform.y - (targetPlatform.displayHeight / 2) - 20;
+
+            this.showPickupIndicator(xPos, yPos, this.timers.scoreBonus.warningDuration);
+
+            this.time.delayedCall(this.timers.scoreBonus.warningDuration, () => {
+                if (!this.player.getData('isAlive')) return;
+                const scoreBonus = this.physics.add.sprite(xPos, yPos, 'dc3');
+                scoreBonus.setScale(0.5);
+                scoreBonus.body.setCircle((scoreBonus.width * 0.8) / 2);
+                scoreBonus.body.allowGravity = false;
+                scoreBonus.body.setImmovable(true);
+                scoreBonus.setData('type', 'score'); 
+                this.dc3Objects.add(scoreBonus); // MODIFICADO: Se añade al nuevo grupo 'dc3Objects'
+                scoreBonus.alias = 'DC3';
+            });
+        }
     }
 
     spawnShieldObject() {
         if (!this.gameStarted || !this.player.getData('isAlive') || this.hasShield) return;
-        const x = Phaser.Math.Between(30, this.scale.width - 30);
-        const y = this.cameras.main.scrollY - this.scale.height * 1.5;
-        const shield = this.physics.add.sprite(x, y, 'helmet');
-        shield.setScale(0.5);
-        shield.body.setSize(shield.width, shield.height);
-        shield.body.setImmovable(true);
-        shield.body.gravity.y = this.specialObjectsGravity;
-        this.shieldObjects.add(shield);
-        this.shieldObject = shield;
-        shield.alias = 'Casco';
+
+        const xPos = Phaser.Math.Between(30, this.scale.width - 30);
+        const yNotif = this.cameras.main.scrollY + 50;
+
+        this.showPickupIndicator(xPos, yNotif, this.timers.shieldObject.warningDuration);
+
+        this.time.delayedCall(this.timers.shieldObject.warningDuration, () => {
+            if (!this.player.getData('isAlive') || this.hasShield) return;
+
+            const ySpawn = this.cameras.main.scrollY - 50;
+            const shield = this.physics.add.sprite(xPos, ySpawn, 'helmet');
+            shield.setScale(0.5);
+            shield.body.setSize(shield.width, shield.height);
+            shield.body.gravity.y = this.specialObjectsGravity;
+            this.shieldObjects.add(shield);
+            this.shieldObject = shield;
+            shield.alias = 'Casco';
+        });
     }
 
     spawnBootsObject() {
         if (!this.gameStarted || !this.player.getData('isAlive') || this.hasBoots) return;
-        const x = Phaser.Math.Between(30, this.scale.width - 30);
-        const y = this.cameras.main.scrollY - this.scale.height * 1.5;
-        const boots = this.physics.add.sprite(x, y, 'boots');
-        boots.setScale(0.5);
-        boots.body.setSize(boots.width, boots.height);
-        boots.body.setImmovable(true);
-        boots.body.gravity.y = this.specialObjectsGravity;
-        this.bootsObjects.add(boots);
-        this.bootsObject = boots;
-        boots.alias = 'Botas';
+
+        const visiblePlatforms = this.platforms.getChildren().filter(p =>
+            p.y > this.cameras.main.scrollY && p.y < this.cameras.main.scrollY + this.scale.height * 0.7
+        );
+
+        if (visiblePlatforms.length > 0) {
+            const targetPlatform = Phaser.Utils.Array.GetRandom(visiblePlatforms);
+            const xPos = targetPlatform.x;
+            const yPos = targetPlatform.y - (targetPlatform.displayHeight / 2) - 20;
+
+            this.showPickupIndicator(xPos, yPos, this.timers.bootsObject.warningDuration);
+
+            this.time.delayedCall(this.timers.bootsObject.warningDuration, () => {
+                if (!this.player.getData('isAlive') || this.hasBoots) return;
+                const boots = this.physics.add.sprite(xPos, yPos, 'boots');
+                boots.setScale(0.5);
+                boots.body.setSize(boots.width, boots.height);
+                boots.body.allowGravity = false;
+                boots.body.setImmovable(true);
+                this.bootsObjects.add(boots);
+                this.bootsObject = boots;
+                boots.alias = 'Botas';
+            });
+        }
     }
 
-    handleFallingObjectCollision(player, fallingObject) {
+    handleFallingObjectCollision(player, object) { // Renombrado de 'fallingObject' a 'object' para ser más general
         if (!player.getData('isAlive')) return;
 
-        const type = fallingObject.getData('type');
-        if (type === 'damage') {
+        const type = object.getData('type');
+        if (type === 'damage') { // Ladrillo
             this.hitSound.play();
 
             if (this.hasShield) {
                 this.hasShield = false;
                 this.deactivateShieldGlow();
-                this.shieldObject?.destroy();
-                this.shieldObject = null;
-                this.hitSound.play();
-                fallingObject.destroy();
+                if (this.shieldObject) {
+                    this.shieldObject.destroy();
+                    this.shieldObject = null;
+                }
+                object.destroy(); 
             } else {
                 this.player.setData('isAlive', false);
-                fallingObject.destroy();
+                object.destroy();
 
                 this.endGame();
 
@@ -713,11 +795,11 @@ class MainScene extends Phaser.Scene {
                     }
                 });
             }
-        } else if (type === 'score') {
+        } else if (type === 'score') { // DC3
             this.score += 10;
             this.scoreText.setText('' + this.score);
             this.pickupSound.play();
-            fallingObject.destroy();
+            object.destroy();
         }
     }
 
@@ -773,7 +855,25 @@ class MainScene extends Phaser.Scene {
         }
 
         const cameraBottom = this.cameras.main.scrollY + this.scale.height;
+        // Limpiar objetos que caen fuera de la pantalla
         this.fallingObjects.getChildren().forEach(object => {
+            if (object.y > cameraBottom + 50) {
+                object.destroy();
+            }
+        });
+
+        // Limpiar también los DC3 si caen muy abajo (aunque deberían quedarse en plataformas)
+        this.dc3Objects.getChildren().forEach(object => {
+            if (object.y > cameraBottom + 50) {
+                object.destroy();
+            }
+        });
+        this.shieldObjects.getChildren().forEach(object => {
+            if (object.y > cameraBottom + 50) {
+                object.destroy();
+            }
+        });
+        this.bootsObjects.getChildren().forEach(object => {
             if (object.y > cameraBottom + 50) {
                 object.destroy();
             }
@@ -803,7 +903,7 @@ class MainScene extends Phaser.Scene {
             this.timers.bootsEffect.elapsed += delta;
             if (this.timers.bootsEffect.elapsed >= this.timers.bootsEffect.duration) {
                 this.hasBoots = false;
-                this.player.body.setVelocityY(-550);
+                this.player.body.setVelocityY(this.originalPlayerJumpSpeed);
                 this.originalPlayerJumpSpeed = -550;
             }
         }
@@ -847,7 +947,7 @@ class MainScene extends Phaser.Scene {
         this.handlePlayerMovement();
         this.handlePlatformCollisions();
         this.handlePlatformGeneration();
-        this.handleFallingObjects(delta);
+        this.handleFallingObjects(delta); // Aquí se manejan los ladrillos y la aparición de DC3
         this.handleShieldSpawning(delta);
         this.handleBootsSpawning(delta);
         this.handleBootsEffect(delta);
