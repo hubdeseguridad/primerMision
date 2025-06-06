@@ -228,7 +228,7 @@ class GameOverScene extends Phaser.Scene {
     }
 
     claimPrizes() {
-        window.location.href = 'premios.html';
+        window.location.href = '../premios/index.html';
         const pauseButton = document.querySelector('.pause-btn');
         if (pauseButton) {
             pauseButton.classList.add('hidden');
@@ -283,19 +283,18 @@ class GameOverScene extends Phaser.Scene {
             const file = new File([blob], `MiPuntajeHubito_${this.finalScore}.png`, { type: 'image/png' });
 
             // Define la URL del juego aquí
-            const gameUrl = 'https://pages.elhubdeseguridad.com/primerMision/game/'; // <--- NUEVO: Define la URL del juego
+            const gameUrl = 'https://pages.elhubdeseguridad.com/primerMision/game/'; // 
 
-            if (navigator.share && navigator.canShare({ files: [file], url: gameUrl })) { // <--- MODIFICADO AQUÍ para incluir 'url'
+            if (navigator.share && navigator.canShare({ files: [file], url: gameUrl })) { // 
                 await navigator.share({
                     files: [file],
                     title: '¡Mi nuevo puntaje en Hubito!',
                     text: `¡Logré ${this.finalScore} puntos en Hubito! ¿Puedes superarlo?`,
-                    url: gameUrl, // <--- NUEVO: Pasa la URL aquí
+                    url: gameUrl, // 
                 });
                 console.log('Contenido compartido con éxito.');
             } else {
                 console.warn('Web Share API no soporta compartir archivos o URLs en este navegador o contexto.');
-                // Fallback si la API no soporta files Y URLs
                 alert('Tu navegador no soporta compartir imágenes y enlaces directamente. Puedes descargar la imagen y copiar el enlace para compartir manualmente:\n' + gameUrl);
             }
         } catch (error) {

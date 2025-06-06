@@ -363,6 +363,10 @@ main .footer_container p {
     font-size: 24px;
     margin-top: 50px;
   }
+  #mc_embed_shell form {
+    align-items: center;
+    justify-content: center;
+  }
   #mc_embed_shell form .mc-field-group {
     width: 380px;
     height: 50px;
@@ -370,7 +374,7 @@ main .footer_container p {
   #mc_embed_shell form #mce-FNAME,
   #mc_embed_shell form #mce-EMAIL,
   #mc_embed_shell form .phonepart {
-    width: 95%;
+    width: 90%;
   }
   #mc_embed_shell form .phonepart {
     width: 25%;

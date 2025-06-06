@@ -115,6 +115,7 @@ section {
 
             @include b.responsive(v.$breakpoint-tablet) {
                 font-size: 3.5rem;
+                text-align: left;
             }
         }
         .description {
@@ -125,6 +126,7 @@ section {
 
             @include b.responsive(v.$breakpoint-tablet) {
                 font-size: 1.375rem;
+                text-align: left;
             }
         }
 
@@ -335,9 +337,13 @@ section {
     display: flex;
     flex-direction: column;
     gap: 16px;
+
+    @include b.responsive(v.$breakpoint-desktop) {
+        max-width: unset;
+    }
 }
 #courses {
-    background: v.$darkblue-5;
+    background: v.$bg-dark-1;
 
     .the-title .title { color: v.$lightblue-1; }
     .the-content {
@@ -346,19 +352,21 @@ section {
         width: 100%;
 
         @include b.responsive(v.$breakpoint-tablet) {
-            display: grid;
-            grid-template-columns: auto auto;
-            grid-template-rows: auto;
+            display: flex;
             gap: 24px;
+            flex-wrap: wrap;
+            flex-direction: row;
+            justify-content: center;
+            align-items: flex-start;
+            max-width: 780px;
         }
-        @include b.responsive(v.$breakpoint-desktop) {
-            grid-template-columns: 1fr 1fr 1fr 1fr;
+        @include b.responsive(1600px) {
+            max-width: unset;
         }
 
         .course-item {
             display: grid;
             grid-template-areas:
-                "cover tag"
                 "cover title"
                 "cover author";
             grid-template-columns: auto 1fr;
@@ -376,33 +384,48 @@ section {
                 overflow: hidden;
                 display: flex;
                 justify-content: center;
-                border: 2px solid v.$primary-3;
+                box-shadow: 
+                    0px -4px v.$primary-3, // arriba
+                    4px 0px v.$primary-3, // derecha
+                    0px 4px v.$primary-3, // abajo
+                    -4px 0px v.$primary-3; // izquierda
+                margin: 4px;
+                background-color: v.$primary-3;
 
                 .cover {
                     height: 100%;
                     transform: scale(1.2);
+
+                    &:hover {
+                        opacity: 0.5;
+                        filter: hue-rotate(-45deg);
+                    }
                 }
 
                 @include b.responsive(v.$breakpoint-tablet) {
-                    width: 100%;
+                    width: calc(100% - 8px);
                     height: auto;
-                    aspect-ratio: 16 / 9;
+                    aspect-ratio: 3 / 2;
                 }
             }
-            .tag {
-                color: v.$primary-3;
-                font-family: v.$font-blocks;
-                text-transform: uppercase;
-                font-size: 0.75rem;
-                font-weight: 700;
-            }
-            .title--link h3 {
-                font-size: 1.5rem;
-                color: v.$lightblue-3;
+            .title--link .title {
+                font-size: 24px;
+                line-height: 1;
+                color: v.$bg-light-1;
                 margin-bottom: 0.125rem;
+
+                &:hover {
+                    color: v.$primary-2;
+                }
+
+                @include b.responsive(v.$breakpoint-tablet) {
+                    margin-top: 1rem;
+                }
             }
             .author--link .author {
-                font-size: 1rem;
+                font-size: 1.5rem;
+                font-family: v.$font-titles;
+                color: v.$lightblue-3;
             }
 
             @include b.responsive(v.$breakpoint-tablet) {
@@ -417,9 +440,6 @@ section {
         }
         
         @include b.responsive(v.$breakpoint-tablet) {
-            .course-item:nth-child(2n+1) {
-                margin: 0 0 0 auto;
-            }
             .course-item {
                 max-width: 320px;
             }
@@ -427,4 +447,153 @@ section {
 
         
     }
+    .cta {
+        .btn.primary {
+            box-shadow:
+                0px -5px v.$darkblue-5,
+                5px 0px v.$darkblue-5,
+                0px 5px v.$darkblue-5,
+                -5px 0px v.$darkblue-5,
+                0px 10px v.$darkblue-4,
+                5px 5px v.$darkblue-4,
+                -5px 5px v.$darkblue-4,
+                inset 0px 5px v.$primary-2;
+        }
+        .btn.primary:active {
+            box-shadow:
+                0px -5px v.$darkblue-5,
+                5px 0px v.$darkblue-5,
+                0px 5px v.$darkblue-5,
+                -5px 0px v.$darkblue-5,
+                inset 0px 5px v.$primary-2;
+        }
+    }
+}
+
+#footer {
+    background-color: v.$bg-dark-2;
+
+    .container {
+        gap: 16px;
+    }
+
+    .logo {
+        max-width: 136px;
+
+        img { width: 100%; }
+    }
+    .sm-links {
+        display: flex;
+        gap: 16px;
+    }
+    .sm-links .sm-link {
+        margin: 3px;
+        height: 38px;
+
+        &:hover {
+            margin: 0;
+            border: 3px solid v.$primary-3;
+        }
+    }
+    .copy, .legal {
+        font-family: v.$font-ui;
+        color: v.$lightblue-1;
+    }
+    .legal a {
+        text-decoration: underline;
+        color: v.$lightblue-1;
+
+        &:hover {
+            color: v.$primary-3;
+        }
+        &:active {
+            color: v.$primary-4;
+        }
+    }
+}
+
+#page--prizes {
+    background-image: url(../img/bg--ehds.png);
+    background-size: cover;
+    background-position: center;    
+
+    .container {
+        margin: auto;
+        width: 100%;
+        padding: 24px 20px;
+        min-height: 100vh;
+        max-width: 480px;
+
+        @include b.responsive(v.$breakpoint-tablet) {
+            padding: 48px 40px;
+        }
+        @include b.responsive(v.$breakpoint-desktop) {
+            padding: 64px 56px;
+            max-width: 1200px;
+        }
+        @include b.responsive(v.$breakpoint-large) {
+            padding: 80px 0;
+        }
+        .title {
+            font-family: v.$font-titles;
+            font-size: 2.5rem;
+            line-height: 1;
+            text-transform: uppercase;
+            color: v.$bg-light-1;
+            margin-bottom: 1rem;
+            text-align: center;
+            width: 100%;
+
+            @include b.responsive(v.$breakpoint-tablet) {
+                font-size: 4rem;
+                margin-bottom: 1rem;
+            }
+        }
+        .prizes {
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-template-rows: 1fr 1fr 1fr;
+            width: 100%;
+            max-width: 480px;
+            gap: 32px;
+            justify-content: center;
+            align-items: center;
+
+            @include b.responsive(v.$breakpoint-tablet) {
+                max-width: unset;
+            }
+            @include b.responsive(v.$breakpoint-desktop) {
+                grid-template-columns: 1fr 1fr 1fr;
+                grid-template-rows: 1fr;
+            }
+        }
+    }
+
+    .prize--item {
+        width: calc(100% - 10px);
+        height: calc(100% - 10px);
+        display: flex;
+        padding: 32px;
+        gap: 32px;
+        background-color: v.$bg-light-1;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        margin: 5px;
+        box-shadow:
+            0px 5px v.$lightblue-5,
+            0px -5px v.$lightblue-5,
+            5px 0px v.$lightblue-5,
+            -5px 0px v.$lightblue-5;
+        
+        .prize {
+            width: 124px;
+        }
+        .the-title {
+            font-size: 28px;
+            line-height: 1;
+            text-align: center;
+        }
+    }
+
 }
