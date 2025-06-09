@@ -574,10 +574,10 @@ section {
         height: calc(100% - 10px);
         display: flex;
         padding: 32px;
-        gap: 32px;
+        gap: 24px;
         background-color: v.$bg-light-1;
         flex-direction: column;
-        justify-content: space-between;
+        justify-content: center;
         align-items: center;
         margin: 5px;
         box-shadow:
@@ -592,7 +592,20 @@ section {
         .the-title {
             font-size: 28px;
             line-height: 1;
+            text-transform: uppercase;
+            text-decoration: underline;
             text-align: center;
+        }
+        .the-description {
+            font-family: v.$font-titles;
+            font-size: 24px;
+            line-height: 1;
+            text-align: justify;
+        }
+        ul.the-description li {
+            margin-left: 24px;
+            list-style-type: square;
+            color: v.$darkblue-1;
         }
     }
 
