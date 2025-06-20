@@ -89,6 +89,24 @@
             <script type="text/javascript" src="//s3.amazonaws.com/downloads.mailchimp.com/js/mc-validate.js"></script>
 
 
+            <script>
+                // Comprueba si el navegador soporta Service Workers
+                if ('serviceWorker' in navigator) {
+                    // Espera a que la página se cargue completamente antes de registrar
+                    window.addEventListener('load', () => {
+                        navigator.serviceWorker.register('/service-worker.js')
+                            .then((registration) => {
+                                console.log('Service Worker registrado con éxito. Scope:', registration.scope);
+                            })
+                            .catch((error) => {
+                                console.error('Fallo en el registro del Service Worker:', error);
+                            });
+                    });
+                } else {
+                    console.warn('Tu navegador no soporta Service Workers.');
+                }
+            </script>
+
             <div id="loading-overlay" style="display: none;">
                 <img src="assets/img/Hubito.gif" alt="Hubito-Cargando">
                 <div class="loading-content">
